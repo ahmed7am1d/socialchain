@@ -1,0 +1,14 @@
+.walletsContainer {
+    position: relative;
+}
+.walletsContainer::after {
+    position: absolute;
+    content: "";
+    height: 100%;
+    width: 10px;
+    background-color: #F213A4;
+    top: 0;
+    left: 0px;
+    bottom: 0;
+    right: 100px;
+}

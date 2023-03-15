@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>2ddf1c62-df6b-4cad-b990-3f5d3ec3313f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\socialchain.contracts\socialchain.contracts.csproj" />
+    <ProjectReference Include="..\socialchain.application\socialchain.application.csproj" />
+    <ProjectReference Include="..\socialchain.infrastructure\socialchain.infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

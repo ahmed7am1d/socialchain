@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "socialchain.api", "socialchain.api\socialchain.api.csproj", "{290B1955-3B48-4620-980C-A0F6110DECD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "socialchain.contracts", "socialchain.contracts\socialchain.contracts.csproj", "{9DE29829-4245-4B72-A699-78732329763C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "socialchain.infrastructure", "socialchain.infrastructure\socialchain.infrastructure.csproj", "{CD7FFCB3-D9E5-47AF-B24C-D9CD8233D467}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "socialchain.domain", "socialchain.domain\socialchain.domain.csproj", "{C4BED257-CB6F-40AC-A098-38E03B2A132E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "socialchain.application", "socialchain.application\socialchain.application.csproj", "{8B2BBE1D-7D6F-4768-8D9E-658608DE887B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{290B1955-3B48-4620-980C-A0F6110DECD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{290B1955-3B48-4620-980C-A0F6110DECD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{290B1955-3B48-4620-980C-A0F6110DECD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{290B1955-3B48-4620-980C-A0F6110DECD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DE29829-4245-4B72-A699-78732329763C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DE29829-4245-4B72-A699-78732329763C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DE29829-4245-4B72-A699-78732329763C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DE29829-4245-4B72-A699-78732329763C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD7FFCB3-D9E5-47AF-B24C-D9CD8233D467}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD7FFCB3-D9E5-47AF-B24C-D9CD8233D467}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD7FFCB3-D9E5-47AF-B24C-D9CD8233D467}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD7FFCB3-D9E5-47AF-B24C-D9CD8233D467}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4BED257-CB6F-40AC-A098-38E03B2A132E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4BED257-CB6F-40AC-A098-38E03B2A132E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4BED257-CB6F-40AC-A098-38E03B2A132E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4BED257-CB6F-40AC-A098-38E03B2A132E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B2BBE1D-7D6F-4768-8D9E-658608DE887B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B2BBE1D-7D6F-4768-8D9E-658608DE887B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B2BBE1D-7D6F-4768-8D9E-658608DE887B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B2BBE1D-7D6F-4768-8D9E-658608DE887B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
