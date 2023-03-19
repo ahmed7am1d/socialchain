@@ -1,14 +1,16 @@
 import React from "react";
 import styles from "../../pages/home/home.module.css";
 import {
-    HomeOutlined,
-    NotificationOutlined,
-    EnvironmentOutlined,
-    FileTextOutlined,
-    CalendarOutlined,
-    LogoutOutlined,
-    SettingOutlined,
+  HomeOutlined,
+  NotificationOutlined,
+  EnvironmentOutlined,
+  FileTextOutlined,
+  CalendarOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
+import Link from "next/link";
 export const LeftSideBar = () => {
   return (
     <aside className="p-5">
@@ -26,10 +28,18 @@ export const LeftSideBar = () => {
           <ul
             className={`flex flex-col gap-y-5 mt-5 text-white ${styles.homePageNavigationWrapper} `}
           >
-            <li className="flex items-center gap-x-5">
-              <HomeOutlined />
-              <span>Home</span>
-            </li>
+            <Link href="/home">
+              <li className="flex items-center gap-x-5">
+                <HomeOutlined />
+                <span>Home</span>
+              </li>
+            </Link>
+            <Link href="/home/profile">
+              <li className="flex items-center gap-x-5">
+                <UserOutlined />
+                <span>My profile</span>
+              </li>
+            </Link>
             <li className="flex items-center gap-x-5">
               <NotificationOutlined />
               <span>Latest crypto news</span>
