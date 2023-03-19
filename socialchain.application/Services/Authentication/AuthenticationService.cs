@@ -35,7 +35,7 @@ namespace socialchain.application.Services.Authentication
             return new NonceResult(tempToken, GetMessage(accountAddress, nonce));
         }
 
-        public ErrorOr<VerifyResult>Verify(string signature, string tempToken)
+        public ErrorOr<VerifyResult> Verify(string signature, string tempToken)
         {
 
             string filteredSignture = JsonConvert.DeserializeObject<string>(signature);
