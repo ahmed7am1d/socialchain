@@ -1,6 +1,10 @@
 import React from "react";
-
-const Home = () => {
-  return <div>home</div>;
+import { Feed } from "@/components/HomePage/Feed";
+import HomePageLayout from "@/layouts/homePageLayout";
+const Index = ({ children }) => {
+  return (
+    <Feed/>
+  );
 };
-export default Home;
+export default Index;
+Index.Layout = HomePageLayout;
