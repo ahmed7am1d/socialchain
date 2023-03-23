@@ -127,7 +127,7 @@ export default function IndexPage() {
                   duration: 2,
                 }}
               >
-                <ShieldCheck color="#F213A4" size={37} weight="fill" />
+                <ShieldCheck className="text-darkBlue" size={37} weight="fill" />
                 <p className="w-20 font-semibold">Security</p>
               </motion.div>
               <motion.div
@@ -146,7 +146,7 @@ export default function IndexPage() {
                   duration: 2.3,
                 }}
               >
-                <Detective color="#F213A4" size={37} weight="fill" />
+                <Detective className="text-darkBlue" size={37} weight="fill" />
                 <p className="w-20 font-semibold">Transparency</p>
               </motion.div>
               <motion.div
@@ -165,7 +165,7 @@ export default function IndexPage() {
                   duration: 2.7,
                 }}
               >
-                <FolderSimpleLock color="#F213A4" size={37} weight="fill" />
+                <FolderSimpleLock className="text-darkBlue" size={37} weight="fill" />
                 <p className="w-20 font-semibold">Immutable</p>
               </motion.div>
             </div>

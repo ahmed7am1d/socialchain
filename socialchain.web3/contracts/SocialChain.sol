@@ -6,10 +6,16 @@ import "hardhat/console.sol";
 
 contract SocialChain {
     //#region Varaibles/states
-
-    address payable public owner;
+    address payable public owner; //Owner is also a maintainer
     uint public totalUsers = 0;
 
+    //#endregion
+
+    //#region  Contract constructor
+    constructor() {
+        owner = payable(msg.sender);
+        registerUser("owner", "owner", "", "", "owner", 1, true);
+    }
     //#endregion
 
     //#region Structs
@@ -65,24 +71,38 @@ contract SocialChain {
     //#endregion
 
     //#region enums
-    enum accountStatus {NP,Active,Banned,Deactived}
+    enum accountStatus {
+        NP,
+        Active,
+        Banned,
+        Deactived
+    }
     //#endregion
 
     //#region Modifiers/checkers
-    modifier checkUserNotRegisteredByAddress(address userAddress)
-    {
-        require(users[userAddress].status == accountStatus.NP,"User already registered");
+    modifier checkUserNotRegisteredByAddress(address userAddress) {
+        require(
+            users[userAddress].status == accountStatus.NP,
+            "User already registered"
+        );
         _;
     }
-    modifier checkUserNameTaken(string memory userName)
-    {
-        require(!usernames[userName],"Username already taken");
+    modifier checkUserNameTaken(string memory userName) {
+        require(!usernames[userName], "Username already taken");
         _;
     }
 
     //#endregion
 
     //#region Functions
+    function greetings() public pure  returns (string memory) {
+        return "Welcome to the Social chain platform :)";
+    }
+
+    function userNameAvailable(string memory _username) public view returns(bool status) {
+        return !usernames[_username];
+    }
+
     function registerUser(
         string memory _username,
         string memory _name,
@@ -91,7 +111,11 @@ contract SocialChain {
         string memory _bio,
         uint birthDate,
         bool showUserName
-    ) public checkUserNotRegisteredByAddress(msg.sender) checkUserNameTaken(_username) {
+    )
+        public
+        checkUserNotRegisteredByAddress(msg.sender)
+        checkUserNameTaken(_username)
+    {
         //Attack prevented
         //[1]- reserve the user name
         usernames[_username] = true;
