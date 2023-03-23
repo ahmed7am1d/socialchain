@@ -2,12 +2,12 @@ const hre = require("hardhat");
 
 async function main() {
 
+  //[1]- Deployment of the contract
   const SocialChain = await hre.ethers.getContractFactory("SocialChain");
-  const socialChain = await Lock.deploy(unlockTime, { value: lockedAmount });
+  const socialChain = await SocialChain.deploy();
+  await socialChain.deployed();
 
-  await lock.deployed();
-
-  console.log("SocialChain deployed to:",lock.address);
+  console.log("SocialChain contract deployed to:",socialChain.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
