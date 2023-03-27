@@ -63,6 +63,14 @@ contract SocialChain {
     //mapping to check which username is taken
     mapping(string => bool) private usernames;
 
+
+    //mapping to get a post by post Id
+    mapping (uint => Post) private posts;
+    //mapping or list to store all postsId that is done by specific user (user address)
+    mapping (address => uint[]) private userPosts;
+    //mapping to track who like which post
+    // mapping(uint=>mapping(address=>bool)) private postLikers;
+    
     //#endregion
 
     //#region Event to be emitted
@@ -141,5 +149,7 @@ contract SocialChain {
         //[6]- emit the event
         emit logRegisterUser(msg.sender, id);
     }
+
+
     //#endregion
 }
