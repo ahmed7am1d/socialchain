@@ -1,11 +1,13 @@
-import React from "react";
-import { message } from "antd";
+import React, { useState, useRef, useEffect } from "react";
+import { Checkbox, message } from "antd";
 import { ethers } from "ethers";
 import { nonce, verify } from "@/services/Auth/authService";
 import useAuth from "@/hooks/useAuth";
 import { useRouter } from "next/router";
 import cookie from "cookie";
-
+import { DatePicker, Form } from "antd";
+import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
+import useIPFS from "@/hooks/useIpfs";
 import perofrmanceImage from "../../assets/Images/performanceImage.png";
 import transparencyImage from "../../assets/Images/transparency.png";
 import metaMaskImage from "../../assets/Images/MetaMask_Fox.svg.png";
@@ -17,11 +19,14 @@ import trezarWallet from "../../assets/logos/trezarwallet.png";
 import keyStore from "../../assets/logos/keyStore.png";
 import kava from "../../assets/logos/kavaWallet.png";
 import osmosis from "../../assets/logos/osmosis.png";
+import uploadImage from "../../assets/Images/uploadImage.png";
 
 import Image from "next/image";
 import classes from "./login.module.css";
 import { motion } from "framer-motion";
 import { isValidJWT } from "@/utils/Jwt/jwtUtilis";
+import { yupSyncRegisterValidation } from "@/validations/Auth/UserRegisterValidationScheme";
+import fileToBase64 from "@/utils/Files/FileUtil";
 
 export async function getServerSideProps(context) {
   //Catching the error if no cookies exists
@@ -50,51 +55,63 @@ export async function getServerSideProps(context) {
 }
 
 const login = () => {
+  //#region states & variables
   const { auth, setAuth } = useAuth();
   const [messageApi, contextHolder] = message.useMessage();
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const [selectedProfilePictureSrc, setSelectedProfilePictureSrc] =
+    useState("");
+  const [selectedProfilePictureFile, setSelectedProfilePictureFile] =
+    useState("");
+  const [selectedProfilePictureSrcBytes, setSelectedProfilePictureSrcBytes] =
+    useState("");
+  const { uploadFileToIPFS } = useIPFS();
+  const imageRef = useRef();
   const router = useRouter();
+  const dateFormat = "DD/MM/YYYY";
+  //#endregion
 
-  //- User registering
-  const handleConnect = async () => {
+  //#region handling modals
+  const handleRegisterModal = async () => {
+    setIsRegisterModalOpen(!isRegisterModalOpen);
+  };
+
+  const handleConnectModal = async () => {
+    setIsConnectModalOpen(!isConnectModalOpen);
+  };
+  //#endregion
+
+  //#region Forms and validations
+
+  const [{ form: connectWalletForm }] = Form.useForm();
+  const handleConnectWalletForm = async (e) => {
+    let userRegisterObject = {
+      bio: e.bio,
+      userName: e.userName,
+      name: e.name,
+      rememberMe: e.remember,
+      birthDate: e.dateOfBirth,
+    };
+
+    //[1]- Let the user connect the wallet and get his address and contienu with auth workflow
     if (window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const accountsAddress = await provider.send("eth_requestAccounts", []);
-      const accountAddress = accountsAddress[0];
-
-      //[1]- nonce
-      const messageTempToken = await nonce(accountAddress);
-      //[2]- get user signature
-      let signature = "";
       try {
-        signature = await signer.signMessage(messageTempToken.message);
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        //let the user connect to his account
+        const signer = provider.getSigner();
+        const accountAddresses = await provider.send("eth_requestAccounts", []);
+        var connectedAccountAddress = accountAddresses[0];
       } catch (e) {
         messageApi.open({
           type: "error",
-          content: "You have to sign the message to register to get JWT !!",
+          content:
+            "You have to connect to your account to be able to continue !!",
         });
         return false;
       }
-      //[3]- verify and get accessToken
-      const accessTokenAndDataResult = await verify(
-        messageTempToken.tempToken,
-        signature
-      );
-      if (accessTokenAndDataResult?.status > 206) {
-        messageApi.open({
-          type: "error",
-          content: accessTokenAndDataResult?.data?.title,
-        });
-        return false;
-      }
-      //[4]- set the auth context
-      setAuth({
-        isAuthenticated: true,
-        accountAddress: accountAddress,
-        accessToken: accessTokenAndDataResult?.accessToken,
-      });
-      //[5]- Redirect user
-      router.push("/home");
+
+      console.log(connectedAccountAddress);
     } else {
       //User does not have metamask Installed
       messageApi.open({
@@ -103,16 +120,318 @@ const login = () => {
       });
       return false;
     }
+    //[2]- Upload user image to IPFS if only Image exists
+    if (selectedProfilePictureSrc) {
+      uploadFileToIPFS(selectedProfilePictureFile).then((ipfsProfilePictureHash) => {
+        userRegisterObject.ipfsProfilePictureHash = ipfsProfilePictureHash;
+        console.log(userRegisterObject);
+      });
+    }
+
+    //[3]- Call the contract and the function registerUser
+
+    //[4]- Forward the user to the login page
   };
+
+  //#endregion
+
+  //#region Handling clicking events
+  const handleProfileImageChange = async (e) => {
+    if (e?.target?.files?.[0]) {
+      const file = e.target.files[0];
+      setSelectedProfilePictureFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedProfilePictureSrc(reader.result);
+      };
+      reader.readAsDataURL(file);
+
+      //set the images bytes
+      const base64ImageNotFormatted = await fileToBase64(file);
+      const base64ImageFormatted = base64ImageNotFormatted.slice(
+        base64ImageNotFormatted.indexOf(",") + 1,
+        base64ImageNotFormatted.length
+      );
+      setSelectedProfilePictureSrcBytes(base64ImageFormatted);
+    }
+  };
+  const showOpenFileDialog = () => {
+    imageRef.current.click();
+  };
+  const deleteProfileImageHandler = () => {
+    setSelectedProfilePictureSrc("");
+    setSelectedProfilePictureSrcBytes("");
+  };
+  //#endregion
+
+  //- User registering
+  // const handleConnect = async () => {
+  //   if (window.ethereum) {
+  //     const provider = new ethers.providers.Web3Provider(window.ethereum);
+  //     const signer = provider.getSigner();
+  //     const accountsAddress = await provider.send("eth_requestAccounts", []);
+  //     const accountAddress = accountsAddress[0];
+
+  //     //[1]- nonce
+  //     const messageTempToken = await nonce(accountAddress);
+  //     //[2]- get user signature
+  //     let signature = "";
+  //     try {
+  //       signature = await signer.signMessage(messageTempToken.message);
+  //     } catch (e) {
+  //       messageApi.open({
+  //         type: "error",
+  //         content: "You have to sign the message to register to get JWT !!",
+  //       });
+  //       return false;
+  //     }
+  //     //[3]- verify and get accessToken
+  //     const accessTokenAndDataResult = await verify(
+  //       messageTempToken.tempToken,
+  //       signature
+  //     );
+  //     if (accessTokenAndDataResult?.status > 206) {
+  //       messageApi.open({
+  //         type: "error",
+  //         content: accessTokenAndDataResult?.data?.title,
+  //       });
+  //       return false;
+  //     }
+  //     //[4]- set the auth context
+  //     setAuth({
+  //       isAuthenticated: true,
+  //       accountAddress: accountAddress,
+  //       accessToken: accessTokenAndDataResult?.accessToken,
+  //     });
+  //     //[5]- Redirect user
+  //     router.push("/home");
+  //   } else {
+  //     //User does not have metamask Installed
+  //     messageApi.open({
+  //       type: "error",
+  //       content: "No Digital Wallet is connected !",
+  //     });
+  //     return false;
+  //   }
+  // };
+
   return (
     <>
       {contextHolder}
-      <div className="absolute w-screen h-[300px] bg-primaryPinkColorTrans top-60 -z-1 -skew-y-12 transform-gpu origin-top bottom-0"></div>
-      <div className="h-screen px-12 py-4 relative overflow-y-auto overflow-x-hidden scrollbar-none">
+      {/* Background curve */}
+      <div className="absolute w-screen h-[300px]  bg-primaryPinkColorTrans top-60 -z-1 -skew-y-12 transform-gpu origin-top bottom-0"></div>
+      {/* Register modal*/}
+      <motion.div
+        id="authentication-modal"
+        className={`fixed flex justify-center backdrop  items-center z-50 ${
+          !isRegisterModalOpen && "hidden"
+        } w-full h-screen p-4 overflow-x-hidden overflow-y-auto md:inset-0 `}
+        initial={{
+          opacity: 0,
+          scale: 0,
+        }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+        }}
+        transition={{
+          duration: 2,
+        }}
+      >
+        <div className="relative w-full h-full max-w-md md:h-auto">
+          {/* <!-- Modal content --> */}
+          <div className="relative rounded-lg shadow bg-darkBlueHalfTrans">
+            {/* Close Button */}
+            <button
+              onClick={handleRegisterModal}
+              type="button"
+              className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+              data-modal-hide="authentication-modal"
+            >
+              <svg
+                aria-hidden="true"
+                className="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                ></path>
+              </svg>
+              <span className="sr-only">Close modal</span>
+            </button>
+            {/* Content */}
+            <div className="px-6 py-6 lg:px-8">
+              <h3 className="mb-4 text-xl font-medium text-gray-900 dark:text-white">
+                Sign up to{" "}
+                <span className=" bg-primaryPinkColor rounded-md p-1">
+                  Social chain
+                </span>
+              </h3>
+              <Form
+                form={connectWalletForm}
+                onFinish={handleConnectWalletForm}
+                className="space-y-1"
+                initialValues={{
+                  remember: false,
+                  userName: "",
+                  name: "",
+                  bio: "",
+                  dateOfBirth: "",
+                  profilePicture: "",
+                }}
+              >
+                {/* user name + name inputs */}
+                <div className="flex items-center gap-x-5 ">
+                  <div>
+                    <label
+                      htmlFor="userName"
+                      className="block mb-2 text-sm font-medium  text-white"
+                    >
+                      User name
+                    </label>
+                    <Form.Item
+                      rules={[yupSyncRegisterValidation]}
+                      name="userName"
+                    >
+                      <input
+                        type="text"
+                        name="userName"
+                        id="userName"
+                        className=" text-sm rounded-lg block w-full p-2.5 bg-gray-600 text-white focus:outline-none focus:border-none"
+                      />
+                    </Form.Item>
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Name
+                    </label>
+                    <Form.Item name="name">
+                      <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        className=" text-sm rounded-lg block w-full p-2.5 bg-gray-600 text-white focus:outline-none focus:border-none"
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+                {/* Bio text area */}
+                <div>
+                  <label
+                    htmlFor="bio"
+                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:border-none"
+                  >
+                    Bio
+                  </label>
+                  <Form.Item name="bio">
+                    <textarea
+                      name="bio"
+                      id="bio"
+                      className=" text-sm rounded-lg block w-full p-2.5 bg-gray-600 text-white focus:outline-none focus:border-none"
+                    />
+                  </Form.Item>
+                </div>
+                {/* Date of birth */}
+                <div>
+                  <label
+                    htmlFor="bio"
+                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                  >
+                    Date of birth:
+                  </label>
+                  <Form.Item name="dateOfBirth">
+                    <DatePicker
+                      format={dateFormat}
+                      allowClear={false}
+                      className={`${classes.birthDatePicker} bg-gray-600 text-white`}
+                    />
+                  </Form.Item>
+                </div>
+                {/* Remember me */}
+                <div className="flex items-start">
+                  <Form.Item name="remember" valuePropName="checked">
+                    <Checkbox className="text-white text-sm font-medium">
+                      Remember me
+                    </Checkbox>
+                  </Form.Item>
+                </div>
+                {/* Profile picture */}
+                <div>
+                  <h1 className="text-white text-sm font-medium">
+                    Profile picture:
+                  </h1>
+                  <div className="flex justify-center">
+                    <Form.Item name="profilePicture">
+                      <input
+                        ref={imageRef}
+                        type="file"
+                        style={{ display: "none" }}
+                        accept="image/*"
+                        onChange={handleProfileImageChange}
+                      />
+                    </Form.Item>
+                    {selectedProfilePictureSrc ? (
+                      <Image
+                        src={selectedProfilePictureSrc}
+                        width={32}
+                        height={32}
+                        className="w-32 h-32 rounded-full mt-0 mb-10"
+                        alt="User profile container"
+                      />
+                    ) : (
+                      <div className=" w-32 h-32 rounded-full duration-200  mb-10 bg-primaryPinkColorTrans mt-0"></div>
+                    )}
+                    {selectedProfilePictureSrc ? (
+                      <div
+                        className=" duration-200 cursor-pointer absolute flex items-center justify-center w-32 h-32 rounded-full  mb-10 opacity-0 hover:opacity-100 hover:bg-gray-600 mt-0 m"
+                        onClick={deleteProfileImageHandler}
+                      >
+                        <DeleteOutlined
+                          style={{ fontSize: "30px", color: "white" }}
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className=" duration-200 cursor-pointer absolute flex items-center justify-center w-32 h-32 rounded-full  mb-10 opacity-0 hover:opacity-100 hover:bg-gray-600 mt-0 m"
+                        onClick={showOpenFileDialog}
+                      >
+                        <UploadOutlined
+                          style={{ fontSize: "30px", color: "white" }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {/* Continue button */}
+                <button
+                  type="submit"
+                  className="w-full text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-primaryPinkColor "
+                >
+                  Continue
+                </button>
+              </Form>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+      {/* Connect modal */}
+      {/* Main content */}
+      <div
+        className={`h-screen px-12 py-4 relative overflow-y-auto overflow-x-hidden scrollbar-none duration-500 ${
+          isRegisterModalOpen && "blur bg-darkBlack opacity-50"
+        }`}
+      >
         <div className="grid grid-cols-2 h-full gap-x-6">
           {/* Wallets */}
           <motion.div
-            className={`bg-darkBlue rounded-md p-5 space-y-10 ${classes.walletsContainer} `}
+            className={`bg-darkBlueHalfTrans rounded-md p-5 space-y-10 ${classes.walletsContainer} `}
             initial={{
               opacity: 0,
               x: -500,
@@ -135,7 +454,7 @@ const login = () => {
               </p>
             </div>
             {/* Wallets and networks */}
-            <div className="flex flex-wrap justify-center gap-x-14 gap-y-2">
+            <div className="flex flex-wrap justify-center gap-x-14 gap-y-2 font-poppins">
               <div className="p-5 w-1/4 bg-[#F5F7F9] rounded-md flex flex-col  items-center">
                 <Image src={metaMaskImage} alt="logo" width={32} height={32} />
                 <p>MetaMask</p>
@@ -200,17 +519,19 @@ const login = () => {
             </div>
             {/* Connect button */}
             <button
+              data-modal-target="authentication-modal"
+              data-modal-toggle="authentication-modal"
               className="w-full  rounded bg-primaryPinkColor shadow-xl shadow-primaryPinkColor/50 hover:bg-primaryPinkColor/50 duration-500 text-white p-3"
-              onClick={handleConnect}
+              onClick={handleRegisterModal}
             >
-              CONNECT WALLET
+              REGISTER NOW TO SOCIAL CHAIN
             </button>
           </motion.div>
           {/* Features */}
           <div className=" flex flex-col justify-between gap-y-6">
             {/* Upper box */}
             <motion.div
-              className="h-1/2 bg-darkBlue rounded-md text-center flex flex-col   justify-center"
+              className="h-1/2 bg-darkBlueHalfTrans  rounded-md text-center flex flex-col   justify-center"
               initial={{
                 opacity: 0,
                 y: -500,
@@ -243,7 +564,7 @@ const login = () => {
             </motion.div>
             {/* Lower box */}
             <motion.div
-              className="h-1/2 bg-darkBlue rounded-md text-center flex flex-col   justify-center"
+              className="h-1/2 bg-darkBlueHalfTrans rounded-md text-center flex flex-col   justify-center"
               initial={{
                 opacity: 0,
                 y: 500,
