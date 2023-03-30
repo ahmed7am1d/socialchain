@@ -1,6 +1,16 @@
 require("@nomicfoundation/hardhat-toolbox");
-
+const socialChainCompiled = require("../socialchain.client/contract-artifacts/contracts/SocialChain.sol/SocialChain.json");
+const { abi, bytecode } = socialChainCompiled;
+//----When running tasks the network should be specified----
 //#region tasks
+//[0]- Greetings task from the SocialChain contract
+task("greetings", "Greetings from social chain :)").setAction(async () => {
+  const MyContract = await ethers.getContractFactory(abi, bytecode);
+  const contract = await MyContract.attach(
+    "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+  );
+  console.log(await contract.greetings());
+});
 //[1]- Check if the username is available or not
 task(
   "username-available",
@@ -8,7 +18,7 @@ task(
 )
   .addParam("username", "The username to be checked")
   .setAction(async (taskArgs) => {
-    const MyContract = await ethers.getContractFactory("SocialChain");
+    const MyContract = await ethers.getContractFactory(abi, bytecode);
     const contract = await MyContract.attach(
       "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     );
@@ -24,11 +34,18 @@ task("balance", "Prints an account's balance")
     const balance = await ethers.provider.getBalance(taskArgs.account);
     console.log(ethers.utils.formatEther(balance), "ETH");
   });
+
+//[3]- Get user object by account address
+
+
 //#endregion
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: "0.8.18",
+  paths: {
+    artifacts: "../socialchain.client/contract-artifacts",
+  },
   networks: {
     localNetwork: {
       url: "http://127.0.0.1:8545/",
