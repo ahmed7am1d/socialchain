@@ -16,6 +16,7 @@ contract SocialChain {
         owner = payable(msg.sender);
         registerUser("owner", "owner", "", "", "owner", 1, true);
     }
+
     //#endregion
 
     //#region Structs
@@ -103,11 +104,13 @@ contract SocialChain {
     //#endregion
 
     //#region Functions
-    function greetings() public pure  returns (string memory) {
+    function greetings() public view returns (string memory) {
         return "Welcome to the Social chain platform :)";
     }
 
-    function userNameAvailable(string memory _username) public view returns(bool status) {
+    function userNameAvailable(
+        string memory _username
+    ) public view returns (bool status) {
         return !usernames[_username];
     }
 
