@@ -1,25 +1,27 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Checkbox, message } from "antd";
-import { ethers } from "ethers";
-import { nonce, verify } from "@/services/Auth/authService";
+import { ethers, providers } from "ethers";
+import { nonce, verify } from "@/services/api/authService";
 import useAuth from "@/hooks/useAuth";
 import { useRouter } from "next/router";
 import cookie from "cookie";
 import { DatePicker, Form } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
-import useIPFS from "@/hooks/useIpfs";
-import perofrmanceImage from "../../assets/Images/performanceImage.png";
-import transparencyImage from "../../assets/Images/transparency.png";
-import metaMaskImage from "../../assets/Images/MetaMask_Fox.svg.png";
-import connectWallet from "../../assets/logos/connectWallet.png";
-import coinbaseWallet from "../../assets/logos/coinbasewallet.png";
-import formaticWallet from "../../assets/logos/FormaticWallet.jpg";
-import ledgerWallet from "../../assets/logos/ledger_logo.png";
-import trezarWallet from "../../assets/logos/trezarwallet.png";
-import keyStore from "../../assets/logos/keyStore.png";
-import kava from "../../assets/logos/kavaWallet.png";
-import osmosis from "../../assets/logos/osmosis.png";
-import uploadImage from "../../assets/Images/uploadImage.png";
+import {
+  useIPFS,
+  perofrmanceImage,
+  transparencyImage,
+  metaMaskImage,
+  connectWallet,
+  coinbaseWallet,
+  formaticWallet,
+  ledgerWallet,
+  trezarWallet,
+  keyStore,
+  kava,
+  osmosis,
+  uploadImage,
+} from "./imports";
 
 import Image from "next/image";
 import classes from "./login.module.css";
@@ -27,7 +29,9 @@ import { motion } from "framer-motion";
 import { isValidJWT } from "@/utils/Jwt/jwtUtilis";
 import { yupSyncRegisterValidation } from "@/validations/Auth/UserRegisterValidationScheme";
 import fileToBase64 from "@/utils/Files/FileUtil";
-
+import SocialChainContractConstants from "@/constants/blockchain/SocialChainContractConstants";
+import SocialChainContract from "../../contract-artifacts/contracts/SocialChain.sol/SocialChain.json";
+import { euDateToISO8601, iSO8601ToUnixDate } from "@/utils/Date/DateUtil";
 export async function getServerSideProps(context) {
   //Catching the error if no cookies exists
   try {
@@ -57,6 +61,7 @@ export async function getServerSideProps(context) {
 const login = () => {
   //#region states & variables
   const { auth, setAuth } = useAuth();
+  const [userBirthDateString, setUserBirthDateString] = useState("");
   const [messageApi, contextHolder] = message.useMessage();
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
@@ -70,6 +75,7 @@ const login = () => {
   const imageRef = useRef();
   const router = useRouter();
   const dateFormat = "DD/MM/YYYY";
+
   //#endregion
 
   //#region handling modals
@@ -83,7 +89,6 @@ const login = () => {
   //#endregion
 
   //#region Forms and validations
-
   const [{ form: connectWalletForm }] = Form.useForm();
   const handleConnectWalletForm = async (e) => {
     let userRegisterObject = {
@@ -92,6 +97,8 @@ const login = () => {
       name: e.name,
       rememberMe: e.remember,
       birthDate: e.dateOfBirth,
+      ipfsProfilePictureHash: "",
+      ipfsCoverPictureHash: "",
     };
 
     //[1]- Let the user connect the wallet and get his address and contienu with auth workflow
@@ -102,6 +109,94 @@ const login = () => {
         const signer = provider.getSigner();
         const accountAddresses = await provider.send("eth_requestAccounts", []);
         var connectedAccountAddress = accountAddresses[0];
+        //[2]- Upload user image to IPFS if only Image exists
+        if (selectedProfilePictureSrc) {
+          try {
+            const ipfsProfilePictureHash = await uploadFileToIPFS(
+              selectedProfilePictureFile
+            );
+            userRegisterObject.ipfsProfilePictureHash = ipfsProfilePictureHash;
+          } catch (error) {
+            console.error(error);
+            // handle error of ipfs uploading
+          }
+        }
+
+        //[3]- Call the contract and the function greetings (for testing purposes)
+        const contract = new ethers.Contract(
+          SocialChainContractConstants.SOCIAL_CHAIN_CONTRACT_ADDRESS,
+          SocialChainContract.abi,
+          signer
+        );
+        try {
+          //Converting normal date to unix so that contract accept it
+          const userBirthDateStringValue = userBirthDateString;
+          console.log(userBirthDateStringValue);
+          const iSO8601Date = await euDateToISO8601(userBirthDateStringValue);
+          const formattedUnixBirthDate =  await iSO8601ToUnixDate(iSO8601Date);
+          userRegisterObject.birthDate = formattedUnixBirthDate;
+          const transaction = await contract.registerUser(
+            userRegisterObject.userName,
+            userRegisterObject.name,
+            userRegisterObject.ipfsProfilePictureHash,
+            "",
+            userRegisterObject.bio,
+            userRegisterObject.birthDate,
+            true
+          );
+          const transactionResult = await transaction.wait();
+          //transactionResult.events => return list of all emitted events from the function
+          //transactionResult.events[0].args => the args send back from the event at index 0
+          //transactionResult.events[0].userAddress
+          //transactionResult.events[0].userId
+          //If the transaction is successful remember me should be stored:
+          localStorage.setItem("rememberMe", "true");
+          console.log(transactionResult.events);
+        } catch (error) {
+          console.error("Error line 156 => ",error.data.message);
+          return false
+        }
+        //[4]-Generate JWT Token
+        //[A]- nonce
+        const messageTempToken = await nonce(connectedAccountAddress);
+        //[B]- get user signature
+        let signature = "";
+        try {
+          signature = await signer.signMessage(messageTempToken.message);
+          //[C]- verify and get accessToken
+          const accessTokenAndDataResult = await verify(
+            messageTempToken.tempToken,
+            signature
+          );
+          if (accessTokenAndDataResult?.status > 206) {
+            messageApi.open({
+              type: "error",
+              content: accessTokenAndDataResult?.data?.title,
+            });
+            return false;
+          }
+          //[D]- set the auth context
+          setAuth({
+            isAuthenticated: true,
+            accountAddress: connectedAccountAddress,
+            accessToken: accessTokenAndDataResult?.accessToken,
+          });
+
+          //[5]- Forward the user to the login page with sending parameters
+          router.push(
+            {
+              pathname: "/home/profile",
+              query: { userAccountAddress: connectedAccountAddress },
+            },
+            "./home/profile"
+          );
+        } catch (e) {
+          messageApi.open({
+            type: "error",
+            content: "You have to sign the message to register to get JWT !!",
+          });
+          return false;
+        }
       } catch (e) {
         messageApi.open({
           type: "error",
@@ -110,8 +205,6 @@ const login = () => {
         });
         return false;
       }
-
-      console.log(connectedAccountAddress);
     } else {
       //User does not have metamask Installed
       messageApi.open({
@@ -120,17 +213,6 @@ const login = () => {
       });
       return false;
     }
-    //[2]- Upload user image to IPFS if only Image exists
-    if (selectedProfilePictureSrc) {
-      uploadFileToIPFS(selectedProfilePictureFile).then((ipfsProfilePictureHash) => {
-        userRegisterObject.ipfsProfilePictureHash = ipfsProfilePictureHash;
-        console.log(userRegisterObject);
-      });
-    }
-
-    //[3]- Call the contract and the function registerUser
-
-    //[4]- Forward the user to the login page
   };
 
   //#endregion
@@ -162,58 +244,10 @@ const login = () => {
     setSelectedProfilePictureSrc("");
     setSelectedProfilePictureSrcBytes("");
   };
+  const handleBirthDateChange = (date, dateString) => {
+    setUserBirthDateString(dateString);
+  };
   //#endregion
-
-  //- User registering
-  // const handleConnect = async () => {
-  //   if (window.ethereum) {
-  //     const provider = new ethers.providers.Web3Provider(window.ethereum);
-  //     const signer = provider.getSigner();
-  //     const accountsAddress = await provider.send("eth_requestAccounts", []);
-  //     const accountAddress = accountsAddress[0];
-
-  //     //[1]- nonce
-  //     const messageTempToken = await nonce(accountAddress);
-  //     //[2]- get user signature
-  //     let signature = "";
-  //     try {
-  //       signature = await signer.signMessage(messageTempToken.message);
-  //     } catch (e) {
-  //       messageApi.open({
-  //         type: "error",
-  //         content: "You have to sign the message to register to get JWT !!",
-  //       });
-  //       return false;
-  //     }
-  //     //[3]- verify and get accessToken
-  //     const accessTokenAndDataResult = await verify(
-  //       messageTempToken.tempToken,
-  //       signature
-  //     );
-  //     if (accessTokenAndDataResult?.status > 206) {
-  //       messageApi.open({
-  //         type: "error",
-  //         content: accessTokenAndDataResult?.data?.title,
-  //       });
-  //       return false;
-  //     }
-  //     //[4]- set the auth context
-  //     setAuth({
-  //       isAuthenticated: true,
-  //       accountAddress: accountAddress,
-  //       accessToken: accessTokenAndDataResult?.accessToken,
-  //     });
-  //     //[5]- Redirect user
-  //     router.push("/home");
-  //   } else {
-  //     //User does not have metamask Installed
-  //     messageApi.open({
-  //       type: "error",
-  //       content: "No Digital Wallet is connected !",
-  //     });
-  //     return false;
-  //   }
-  // };
 
   return (
     <>
@@ -348,6 +382,7 @@ const login = () => {
                   </label>
                   <Form.Item name="dateOfBirth">
                     <DatePicker
+                      onChange={handleBirthDateChange}
                       format={dateFormat}
                       allowClear={false}
                       className={`${classes.birthDatePicker} bg-gray-600 text-white`}
