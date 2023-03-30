@@ -4,17 +4,13 @@ import { motion } from "framer-motion";
 import { Detective, FolderSimpleLock, ShieldCheck } from "phosphor-react";
 import Image from "next/image";
 import socialchainLogo from "../assets/logos/socialchain.png";
-import indexImage1 from "../assets/Images/indexImage1.jpg";
-import indexImage2 from "../assets/Images/indexImage2.png";
-import indexImage3 from "../assets/Images/indexImage3.png";
-
 export default function IndexPage() {
   return (
     <>
       <Head>
         <title>Social chain</title>
         <meta name="description" content="Social chain" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/blockchain.ico" />
       </Head>
       <div className="absolute w-screen h-[300px] bg-primaryPinkColorTrans top-60 -z-1 -skew-y-12 transform-gpu origin-top bottom-0"></div>
@@ -23,17 +19,15 @@ export default function IndexPage() {
         className=" h-screen 
         max-w-7xl m-auto p-5  relative"
       >
-        {/* <motion.div
+        <motion.div
           initial={{
             opacity: 0,
-            y: -500,
           }}
           animate={{
             opacity: 1,
-            y: 0,
           }}
           transition={{
-            duration: 2,
+            duration: 6,
           }}
         >
           <Image
@@ -43,7 +37,7 @@ export default function IndexPage() {
             alt="Website Logo"
             className=" absolute -top-20 bottom-0 left-0 right-0 mb-4"
           />
-        </motion.div> */}
+        </motion.div>
         {/* Left and right section */}
         <section
           className="
@@ -76,7 +70,7 @@ export default function IndexPage() {
             <h1 className="text-3xl text-primaryPinkColor first-letter:bg-white first-letter:px-[2px] font-bold">
               Social chain
             </h1>
-            <p className="p-1 text-md xl:mr-36 font-poppins">
+            <p className="p-1 text-md xl:mr-36">
               Social chain is a{" "}
               <span className=" text-primaryPinkColor font-semibold font-serif">
                 decentralized media platform
@@ -133,11 +127,7 @@ export default function IndexPage() {
                   duration: 2,
                 }}
               >
-                <ShieldCheck
-                  className="text-primaryPinkColor"
-                  size={37}
-                  weight="fill"
-                />
+                <ShieldCheck color="#F213A4" size={37} weight="fill" />
                 <p className="w-20 font-semibold">Security</p>
               </motion.div>
               <motion.div
@@ -156,11 +146,7 @@ export default function IndexPage() {
                   duration: 2.3,
                 }}
               >
-                <Detective
-                  className="text-primaryPinkColor"
-                  size={37}
-                  weight="fill"
-                />
+                <Detective color="#F213A4" size={37} weight="fill" />
                 <p className="w-20 font-semibold">Transparency</p>
               </motion.div>
               <motion.div
@@ -179,102 +165,12 @@ export default function IndexPage() {
                   duration: 2.7,
                 }}
               >
-                <FolderSimpleLock
-                  className="text-primaryPinkColor"
-                  size={37}
-                  weight="fill"
-                />
+                <FolderSimpleLock color="#F213A4" size={37} weight="fill" />
                 <p className="w-20 font-semibold">Immutable</p>
               </motion.div>
             </div>
           </div>
         </section>
-      </div>
-      {/* Random Images */}
-      <div className="absolute top-24 left-96 right-0 w-fit">
-        <div className="absolute -inset-0.5 bg-gradient-to-t from-primaryPinkColorTrans to-secondaryGold rounded-full blur-xl"></div>
-        <motion.div
-          className="
-            h-20 w-20
-            sm:h-24 sm:w-24
-            md:h-30 md:w-30
-            flex relative overflow-hidden rounded-full
-            "
-          initial={{
-            opacity: 0,
-            rotate: 180,
-          }}
-          animate={{
-            opacity: 1,
-            rotate: 0,
-          }}
-          transition={{
-            duration: 2,
-          }}
-        >
-          <Image
-            src={indexImage1}
-            alt="Profile Photo"
-            className="h-full w-full object-cover"
-          />
-        </motion.div>
-      </div>
-      <div className="absolute bottom-20  right-32 w-fit">
-        <div className="absolute -inset-0.5 bg-gradient-to-t from-primaryPinkColorTrans to-secondaryGold rounded-full blur-xl"></div>
-
-        <motion.div
-          className="
-            h-16 w-16
-            sm:h-20 sm:w-20
-            md:h-30 md:w-30
-            flex relative overflow-hidden rounded-full
-          
-            "
-          initial={{
-            opacity: 0,
-            scale: 0,
-          }}
-          animate={{
-            opacity: 1,
-            scale: 1,
-          }}
-          transition={{
-            duration: 2.5,
-          }}
-        >
-          <Image
-            src={indexImage2}
-            alt="Profile Photo"
-            className="h-full w-full object-cover"
-          />
-        </motion.div>
-      </div>
-      <div className="absolute bottom-20 left-40 right-0 w-fit">
-        <div className="absolute -inset-0.5 bg-gradient-to-t from-darkBlack to-white rounded-full blur-xl"></div>
-
-        <motion.div
-          className="
-            h-16 w-16
-            sm:h-20 sm:w-20
-            md:h-30 md:w-30
-            flex relative overflow-hidden rounded-full
-            "
-          initial={{
-            opacity: 0,
-          }}
-          animate={{
-            opacity: 1,
-          }}
-          transition={{
-            duration: 3,
-          }}
-        >
-          <Image
-            src={indexImage3}
-            alt="Profile Photo"
-            className="h-full w-full object-cover"
-          />
-        </motion.div>
       </div>
     </>
   );

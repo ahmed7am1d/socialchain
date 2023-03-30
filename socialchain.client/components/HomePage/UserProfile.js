@@ -34,15 +34,14 @@ export const UserProfile = () => {
           />
         </div>
         {/* userName */}
-        <div className="text-2xl text-white ">Ahmed Hamid</div>
+        <div className="text-2xl text-white">Ahmed Hamid</div>
       </div>
       {/* navigation's */}
       <div
         className="
           flex justify-center
           md:flex md:justify-end
-          lg:flex lg:justify-center
-       "
+          lg:flex lg:justify-center"
       >
         <ul
           className={`
@@ -50,11 +49,10 @@ export const UserProfile = () => {
             md:gap-x-6
             flex  p-5
             text-gray-400
-            bg-darkBlueHalfTrans
+            bg-darkBlue
             w-full
             justify-center
             h-full
-            font-mono
             ${styles.feedNavigationWrapper}
             `}
         >

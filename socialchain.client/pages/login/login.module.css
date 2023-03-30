@@ -12,14 +12,3 @@
     bottom: 0;
     right: 100px;
 }
-.birthDatePicker input {
-    color: white !important;
-    font-weight: lighter !important;
-}
-.birthDatePicker input::placeholder {
-    color: white !important;
-    opacity: .5;
-}
-.birthDatePicker svg {
-  color: white !important;
-}

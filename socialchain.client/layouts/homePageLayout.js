@@ -7,26 +7,24 @@ const HomePageLayout = ({ children }) => {
     <div
       className="
       font-mono
-      lg:grid-cols-7
-      grid grid-cols-7
-      h-screen
-      divide-x
-      divide-gray-700"
+    md:grid-cols-6
+    h-screen grid grid-cols-8"
     >
       <LeftSideBar />
       <section
         className="
-      lg:col-span-5
+      md:col-span-4
       col-span-6
       overflow-x-hidden
       scrollbar-thin"
       >
         {/* Search bar - takes full width with padding from inside */}
-        <header className="text-sm h-[70px] font-sans">
+        <header className="mx-5">
           <input
             type="search"
-            className="w-full h-full text-white p-5 bg-darkBlueHalfTrans outline-none
-        "
+            className="w-full text-white mt-5 px-3 py-1 bg-darkBlack outline-none 
+          focus:outline focus:outline-primaryPinkColor
+          rounded-lg"
             placeholder="Search for people, content, blogs..."
           />
         </header>

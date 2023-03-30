@@ -5,7 +5,7 @@ export default function App({ Component, pageProps }) {
   const Layout = Component.Layout || DefaultLayout;
   return (
     <AuthProvider>
-      <div className="bg-darkBlack backdrop-blur-sm lg">
+      <div className="bg-darkBlack">
         <Layout>
           <Component {...pageProps} />
         </Layout>
