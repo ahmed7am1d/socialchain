@@ -13,7 +13,7 @@ export default async function middleware(nextRequest) {
     try {
       await jwtVerify(
         jwt,
-        new TextEncoder().encode(process.env.JWT_SECRET_KEY)
+        new TextEncoder().encode(process.env.NEXT_PUBLIC_JWT_SECRET_KEY)
       );
       return NextResponse.redirect(new URL("/home", nextRequest.url));
     } catch (error) {
@@ -28,7 +28,7 @@ export default async function middleware(nextRequest) {
   try {
     const { payload } = await jwtVerify(
       jwt,
-      new TextEncoder().encode(process.env.JWT_SECRET_KEY)
+      new TextEncoder().encode(process.env.NEXT_PUBLIC_JWT_SECRET_KEY)
     );
     return NextResponse.next();
   } catch (error) {
