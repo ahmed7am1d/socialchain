@@ -105,11 +105,7 @@ contract SocialChain {
     //#endregion
 
     //#region Functions
-<<<<<<< Updated upstream
-    function greetings() public view returns (string memory) {
-=======
     function greetings() public pure returns (string memory) {
->>>>>>> Stashed changes
         return "Welcome to the Social chain platform :)";
     }
 
@@ -158,8 +154,6 @@ contract SocialChain {
         emit logRegisterUser(msg.sender, id);
     }
 
-<<<<<<< Updated upstream
-=======
     function getUser(address accountAddress)
         public
         view
@@ -187,7 +181,6 @@ contract SocialChain {
             u.profileCoverImgHash
         );
     }
->>>>>>> Stashed changes
 
     //#endregion
 }
