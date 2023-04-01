@@ -12,6 +12,7 @@ contract SocialChain {
     //#endregion
 
     //#region  Contract constructor
+
     constructor() {
         owner = payable(msg.sender);
         registerUser("owner", "owner", "", "", "owner", 1, true);
@@ -104,7 +105,11 @@ contract SocialChain {
     //#endregion
 
     //#region Functions
+<<<<<<< Updated upstream
     function greetings() public view returns (string memory) {
+=======
+    function greetings() public pure returns (string memory) {
+>>>>>>> Stashed changes
         return "Welcome to the Social chain platform :)";
     }
 
@@ -153,6 +158,36 @@ contract SocialChain {
         emit logRegisterUser(msg.sender, id);
     }
 
+<<<<<<< Updated upstream
+=======
+    function getUser(address accountAddress)
+        public
+        view
+        returns (
+            uint id,
+            string memory userName,
+            string memory name,
+            string memory bio,
+            uint birthDate,
+            bool showUsername,
+            string memory imageHash,
+            string memory coverHash
+        )
+    {
+        User memory u = users[accountAddress];
+
+        return (
+            u.id,
+            u.userName,
+            u.name,
+            u.userBio,
+            u.birthDate,
+            u.showUserName,
+            u.profileImgHash,
+            u.profileCoverImgHash
+        );
+    }
+>>>>>>> Stashed changes
 
     //#endregion
 }
