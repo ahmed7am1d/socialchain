@@ -6,6 +6,7 @@ const SocialChainApiConstants = {
   //Auth endpoints
   NONCE_ENDPOINT: "/auth/nonce",
   VERIFY_ENDPOINT: "/auth/verify",
+  LOGOUT_ENDPOINT:"/auth/logout",
   REFRESHTOKEN_ENDPOINT: "/auth/refresh-token",
 };
 

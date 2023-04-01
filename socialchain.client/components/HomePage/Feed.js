@@ -11,8 +11,10 @@ import {
   ShareAltOutlined,
 } from "@ant-design/icons";
 import Image from "next/image";
+import useAuth from "@/hooks/useAuth";
 
 export const Feed = () => {
+  const { auth } = useAuth();
   return (
     <main className="m-5 grid grid-cols-3 lg:grid-col-4 gap-x-3 ">
       <aside className="hidden lg:flex lg:flex-col lg:gap-y-8 text-sm">
@@ -24,10 +26,7 @@ export const Feed = () => {
             <div>...</div>
           </div>
           <div className="text-gray-300 relative p-2">
-            <p className="text-sm">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae
-              aliquid unde perspiciatis est modi blanditiis fugiat distinctio.
-            </p>
+            <p className="text-sm">{auth.bio}</p>
           </div>
         </div>
         {/* Event */}
@@ -58,12 +57,19 @@ export const Feed = () => {
           </div>
           {/* placeholder and input text */}
           <div className="flex items-center gap-x-5">
-            <div>
+            <div
+              className={`
+            h-8 w-8
+            p-4
+            md:h-10
+            md:w-10
+            flex relative overflow-hidden rounded-full `}
+            >
               <Image
                 className="rounded-full"
-                src={userTempProfilePicture}
-                width={40}
-                height={40}
+                src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                layout="fill"
+                objectFit="cover"
                 alt="Profile picture"
               />
             </div>
@@ -101,9 +107,7 @@ export const Feed = () => {
               </div>
             </div>
             <div>
-              <button
-                className=" bg-primaryPinkColorTrans px-5 py-2 rounded-sm shadow-xl"
-              >
+              <button className=" bg-primaryPinkColorTrans px-5 py-2 rounded-sm shadow-xl">
                 Share
               </button>
             </div>

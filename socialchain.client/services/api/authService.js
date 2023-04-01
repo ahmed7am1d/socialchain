@@ -44,3 +44,14 @@ export const refreshToken = async () => {
     console.log(error);
   }
 };
+
+//Logout
+export const logOut = async () => {
+  try {
+    const response = await SocialChainApi.post(
+      SocialChainApiConstants.LOGOUT_ENDPOINT
+    )
+  } catch (error) {
+
+  }
+}
