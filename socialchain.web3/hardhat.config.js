@@ -34,7 +34,7 @@ task("balance", "Prints an account's balance")
     const balance = await ethers.provider.getBalance(taskArgs.account);
     console.log(ethers.utils.formatEther(balance), "ETH");
   });
-  //[3]- Get user details 
+  //[3]- Get user details
   task("social-chain-user","Get the user details that calls the function")
   .addParam("accountaddress","The account address")
   .setAction(async (taskArgs)=> {

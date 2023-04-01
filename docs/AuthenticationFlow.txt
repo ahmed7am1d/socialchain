@@ -1,0 +1,48 @@
+---------------------------------------For the login process---------------------------------------: 
+
+(make sure to add a step where we make sure the user already registered(Either by ethereum in back-end by calling contract) (Either by calling the contract in the front-end))
+1- user connect his wallet 
+2- retrive user account address 
+3- call the api end point /nonce with sending account address 
+4- Back-end => 
+	- generate nonce (current time)
+	- generate temp jwt token that contains claims
+		- account address 
+		- nonce 
+	- generate a message that contains a  $"Plesae Sign this message for address {accountAddress}{nonce}";
+	- return to the front-end the temp token and the generated message
+4- Front-end => user has to sign the message that is sended back to him 
+5- Back-end => calling /verify end point with sending the generated temp token and the signture 
+	- validate that the temp token is generated using our own secret key 
+	- decode the jwt (to get the account address and the nonce)
+	- Recovering the address from the signed message by providing (original message, user signture)
+	- Check that the recovered address from the signture is equal to the account address
+		- yes equal => check if user already registered 
+			- yes user registered => just update the access token 
+			- no => register the user and generate (access token, refresh token) 
+		- no it is not equal => return error message
+
+
+
+---------------------------------------For the register process---------------------------------------: 
+
+1- user connect his wallet 
+2- retrive user account address 
+3- call the api end point /nonce with sending account address 
+4- Back-end => 
+	- generate nonce (current time)
+	- generate temp jwt token that contains claims
+		- account address 
+		- nonce 
+	- generate a message that contains a  $"Plesae Sign this message for address {accountAddress}{nonce}";
+	- return to the front-end the temp token and the generated message
+4- Front-end => user has to sign the message that is sended back to him 
+5- Back-end => calling /verify end point with sending the generated temp token and the signture 
+	- validate that the temp token is generated using our own secret key 
+	- decode the jwt (to get the account address and the nonce)
+	- Recovering the address from the signed message by providing (original message, user signture)
+	- Check that the recovered address from the signture is equal to the account address
+		- yes equal => check if user already registered 
+			- yes user registered => just update the access token 
+			- no => register the user and generate (access token, refresh token) 
+		- no it is not equal => 

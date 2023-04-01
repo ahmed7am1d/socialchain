@@ -1,16 +1,20 @@
-import { Feed } from '@/components/HomePage/Feed'
-import { UserProfile } from '@/components/HomePage/UserProfile'
-import HomePageLayout from '@/layouts/homePageLayout'
-import React from 'react'
+import { Feed } from "@/components/HomePage/Feed";
+import { UserProfile } from "@/components/HomePage/UserProfile";
+import HomePageLayout from "@/layouts/homePageLayout";
+import React, { useEffect } from "react";
+import Router, { useRouter } from "next/router";
+import { ethers, providers } from "ethers";
+const profile = (props) => {
+  const router = useRouter();
 
- const profile = () => {
+
   return (
     <>
-    <UserProfile/>
-    <Feed/>
+      <UserProfile />
+      <Feed />
     </>
-  )
-}
+  );
+};
 
 export default profile;
 profile.Layout = HomePageLayout;
