@@ -41,8 +41,8 @@ namespace ToDo.Api.Controllers
                 var parameter = headerValue.Parameter;
                 if (parameter == null) return BadRequest();
                 ErrorOr<VerifyResult> verifyResult = _authenticationService.Verify(verifyRequest.Signature, parameter);
-                
-                if(verifyResult.IsError)
+
+                if (verifyResult.IsError)
                 {
                     return Problem(verifyResult.Errors);
                 }
@@ -60,15 +60,31 @@ namespace ToDo.Api.Controllers
         }
 
         [HttpPost("refresh-token")]
-        public IActionResult GetNewAccessToken([FromBody]RefreshTokenRequest refreshTokenRequest)
+        public IActionResult GetNewAccessToken([FromBody] RefreshTokenRequest refreshTokenRequest)
         {
             //[1]- Get the refresh token from the cookies 
-            var refreshToken =refreshTokenRequest.RefreshToken;
+            var refreshToken = refreshTokenRequest.RefreshToken;
             var accessToken = refreshTokenRequest.AccessToken;
             //[2]- Send to authetication services
-            var refreshTokenResult = _authenticationService.UpdatedAccessToken(refreshToken, accessToken);      
+            var refreshTokenResult = _authenticationService.UpdatedAccessToken(refreshToken, accessToken);
             //[3]- Return the response [Cookies will be set in the server side of nextjs]
             return Ok(new RefreshTokenResponse(refreshTokenResult.AccessToken, refreshTokenResult.User.RefreshToken));
+        }
+
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            var accessToken = Request.Cookies["accessToken"];
+            if (refreshToken is null && accessToken is null)
+                return NoContent();
+            //Deleting the cookies [it is important to pass same options as appending]
+            var cookieOptionsRefreshToken = _cookiesService.GetRefreshTokenCookieOptions(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+            var cookieOptionsAccessToken = _cookiesService.GetAccessTokenCookieOptions();
+            HttpContext.Response.Cookies.Delete("refreshToken",cookieOptionsRefreshToken);
+            HttpContext.Response.Cookies.Delete("accessToken", cookieOptionsAccessToken);
+
+            return NoContent();
         }
     }
 }
