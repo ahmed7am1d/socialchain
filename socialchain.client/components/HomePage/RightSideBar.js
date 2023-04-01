@@ -5,7 +5,9 @@ import indexImage3 from "@/assets/Images/indexImage3.png";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { BellOutlined, MailFilled } from "@ant-design/icons";
+import useAuth from "@/hooks/useAuth";
 export const RightSideBar = () => {
+  const {auth} = useAuth();
   return (
     <aside className="hidden lg:flex lg:flex-col lg:gap-y-5 h-screen bg-darkBlueHalfTrans text-gray-300 p-4 text-sm">
       {/* Links section */}
@@ -14,7 +16,7 @@ export const RightSideBar = () => {
         <BellOutlined />
         <div></div>
         <div className="flex  items-center gap-x-3">
-          <p>Ahmed Hamid</p>
+          <p>{auth?.userName}</p>
           <div
             className="
             h-20 w-20
@@ -24,9 +26,9 @@ export const RightSideBar = () => {
             "
           >
             <Image
-              src={indexImage1}
-              alt="Profile Photo"
-              className="h-full w-full object-cover"
+              src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+              layout="fill"
+              objectFit="cover"
             />
           </div>
         </div>

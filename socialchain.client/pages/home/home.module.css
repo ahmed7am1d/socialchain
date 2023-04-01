@@ -40,7 +40,7 @@
   .socialChainLogoWrapper {
     justify-content: center;
   }
-  .socialChainLogoWrapper img{
+   .profilePictureWrapper{
     display: none;
   }
 }

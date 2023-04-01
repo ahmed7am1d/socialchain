@@ -1,8 +1,46 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { LeftSideBar } from "@/components/HomePage/LeftSideBar";
 import { RightSideBar } from "@/components/HomePage/RightSideBar";
-
+import { ethers } from "ethers";
+import useAuth from "@/hooks/useAuth";
+import socialChainContractABI from '../contract-artifacts/contracts/SocialChain.sol/SocialChain.json'
+import SocialChainContractConstants from "@/constants/blockchain/SocialChainContractConstants";
 const HomePageLayout = ({ children }) => {
+  const { auth, setAuth } = useAuth();
+  useEffect(() => {
+    async function setUserInformation() {
+      //[1]- Get user object from the contract
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+       const accountAddresses = await provider.send("eth_requestAccounts", []);
+      const contract = new ethers.Contract(SocialChainContractConstants.SOCIAL_CHAIN_CONTRACT_ADDRESS, socialChainContractABI.abi, provider);
+      const result = await contract.getUser(accountAddresses[0]);
+      const user = {
+        id: parseInt(result[0]._hex,16),
+        userName: result[1],
+        name: result[2],
+        bio: result[3],
+        birthDate: parseInt(result[4]._hex,16),
+        showUsername: result[5],
+        imageHash: result[6],
+        coverHash: result[7],
+        accountAddress: accountAddresses[0]
+      };
+      //[2]- Set it to the auth state
+      setAuth({
+        id: parseInt(result[0]._hex,16),
+        userName: result[1],
+        name: result[2],
+        bio: result[3],
+        birthDate: parseInt(result[4]._hex,16),
+        showUsername: result[5],
+        imageHash: result[6],
+        coverHash: result[7],
+        accountAddress: accountAddresses[0]
+      })
+      //[3]- Pass the state to the components OR use the states in the components
+    }
+    setUserInformation();
+  }, []);
   return (
     <div
       className="

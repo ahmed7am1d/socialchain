@@ -71,5 +71,5 @@ export default async function middleware(nextRequest) {
 }
 
 export const config = {
-  matcher: ["/home"],
+  matcher: ["/home/:path*"],
 };

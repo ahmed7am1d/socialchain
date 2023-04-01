@@ -28,10 +28,12 @@ import classes from "./login.module.css";
 import { motion } from "framer-motion";
 import { isValidJWT } from "@/utils/Jwt/jwtUtilis";
 import { yupSyncRegisterValidation } from "@/validations/Auth/UserRegisterValidationScheme";
-import fileToBase64 from "@/utils/Files/FileUtil";
+import fileToBase64 from "@/utils/Files/fileUtils";
 import SocialChainContractConstants from "@/constants/blockchain/SocialChainContractConstants";
 import SocialChainContract from "../../contract-artifacts/contracts/SocialChain.sol/SocialChain.json";
-import { euDateToISO8601, iSO8601ToUnixDate } from "@/utils/Date/DateUtil";
+import { euDateToISO8601, iSO8601ToUnixDate } from "@/utils/Date/dateUtils";
+import extractContractErrorMessage from "@/utils/Errors/extractContractErrorMessageUtils";
+
 export async function getServerSideProps(context) {
   //Catching the error if no cookies exists
   try {
@@ -133,7 +135,7 @@ const login = () => {
           const userBirthDateStringValue = userBirthDateString;
           console.log(userBirthDateStringValue);
           const iSO8601Date = await euDateToISO8601(userBirthDateStringValue);
-          const formattedUnixBirthDate =  await iSO8601ToUnixDate(iSO8601Date);
+          const formattedUnixBirthDate = await iSO8601ToUnixDate(iSO8601Date);
           userRegisterObject.birthDate = formattedUnixBirthDate;
           const transaction = await contract.registerUser(
             userRegisterObject.userName,
@@ -153,8 +155,13 @@ const login = () => {
           localStorage.setItem("rememberMe", "true");
           console.log(transactionResult.events);
         } catch (error) {
-          console.error("Error line 156 => ",error.data.message);
-          return false
+          //Contract Error
+          const errorMessage = extractContractErrorMessage(error.data.message);
+          messageApi.open({
+            type: "error",
+            content: errorMessage,
+          });
+          return false;
         }
         //[4]-Generate JWT Token
         //[A]- nonce
@@ -175,18 +182,10 @@ const login = () => {
             });
             return false;
           }
-          //[D]- set the auth context
-          setAuth({
-            isAuthenticated: true,
-            accountAddress: connectedAccountAddress,
-            accessToken: accessTokenAndDataResult?.accessToken,
-          });
-
           //[5]- Forward the user to the login page with sending parameters
           router.push(
             {
               pathname: "/home/profile",
-              query: { userAccountAddress: connectedAccountAddress },
             },
             "./home/profile"
           );
@@ -246,6 +245,54 @@ const login = () => {
   };
   const handleBirthDateChange = (date, dateString) => {
     setUserBirthDateString(dateString);
+  };
+  const handleLogin = async () => {
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      //let the user connect to his account
+      const accountAddresses = await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+
+      //[A]- nonce
+      const messageTempToken = await nonce(accountAddresses[0]);
+      //[B]- get user signature
+      let signature = "";
+      try {
+        signature = await signer.signMessage(messageTempToken.message);
+        //[C]- verify and get accessToken
+        const accessTokenAndDataResult = await verify(
+          messageTempToken.tempToken,
+          signature
+        );
+        if (accessTokenAndDataResult?.status > 206) {
+          messageApi.open({
+            type: "error",
+            content: accessTokenAndDataResult?.data?.title,
+          });
+          return false;
+        }
+        //[5]- Forward the user to the login page with sending parameters
+        router.push(
+          {
+            pathname: "/home/profile",
+          },
+          "./home/profile"
+        );
+      } catch (e) {
+        messageApi.open({
+          type: "error",
+          content: "You have to sign the message to register to get JWT !!",
+        });
+        return false;
+      }
+    } else {
+      //User does not have metamask Installed
+      messageApi.open({
+        type: "error",
+        content: "No Digital Wallet is connected !",
+      });
+      return false;
+    }
   };
   //#endregion
 
@@ -560,6 +607,13 @@ const login = () => {
               onClick={handleRegisterModal}
             >
               REGISTER NOW TO SOCIAL CHAIN
+            </button>
+            <p className="text-white">Already a user login with one click:</p>
+            <button
+              onClick={handleLogin}
+              className="w-full  rounded bg-primaryPinkColor shadow-xl shadow-primaryPinkColor/50 hover:bg-primaryPinkColor/50 duration-500 text-white p-3"
+            >
+              Login{" "}
             </button>
           </motion.div>
           {/* Features */}
