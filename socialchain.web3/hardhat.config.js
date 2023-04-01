@@ -34,12 +34,6 @@ task("balance", "Prints an account's balance")
     const balance = await ethers.provider.getBalance(taskArgs.account);
     console.log(ethers.utils.formatEther(balance), "ETH");
   });
-<<<<<<< Updated upstream
-
-//[3]- Get user object by account address
-
-
-=======
   //[3]- Get user details 
   task("social-chain-user","Get the user details that calls the function")
   .addParam("accountaddress","The account address")
@@ -51,7 +45,6 @@ task("balance", "Prints an account's balance")
     const result = await contract.getUser(taskArgs.accountaddress);
     console.log(result);
   })
->>>>>>> Stashed changes
 //#endregion
 
 /** @type import('hardhat/config').HardhatUserConfig */
