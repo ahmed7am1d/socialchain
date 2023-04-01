@@ -20,7 +20,7 @@ task(
   .setAction(async (taskArgs) => {
     const MyContract = await ethers.getContractFactory(abi, bytecode);
     const contract = await MyContract.attach(
-      "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      "0x5fbdb2315678afecb367f032d93f642f64180aa3"
     );
     (await contract.userNameAvailable(taskArgs.username))
       ? console.log("The user name is available.")
@@ -34,10 +34,24 @@ task("balance", "Prints an account's balance")
     const balance = await ethers.provider.getBalance(taskArgs.account);
     console.log(ethers.utils.formatEther(balance), "ETH");
   });
+<<<<<<< Updated upstream
 
 //[3]- Get user object by account address
 
 
+=======
+  //[3]- Get user details 
+  task("social-chain-user","Get the user details that calls the function")
+  .addParam("accountaddress","The account address")
+  .setAction(async (taskArgs)=> {
+    const MyContract = await ethers.getContractFactory("SocialChain");
+    const contract = await MyContract.attach(
+      "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+    );
+    const result = await contract.getUser(taskArgs.accountaddress);
+    console.log(result);
+  })
+>>>>>>> Stashed changes
 //#endregion
 
 /** @type import('hardhat/config').HardhatUserConfig */
