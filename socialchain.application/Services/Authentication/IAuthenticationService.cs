@@ -12,5 +12,6 @@ namespace socialchain.application.Services.Authentication
         NonceResult Nonce(string accountAddress);
         ErrorOr<VerifyResult> Verify(string signature, string tempToken);
         RefreshTokenResult UpdatedAccessToken(string refreshToken,string accessToken);
+        ErrorOr<RegistrationResult> IsRegistered(string accountAddress);
     }
 }
