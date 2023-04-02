@@ -608,13 +608,15 @@ const login = () => {
             >
               REGISTER NOW TO SOCIAL CHAIN
             </button>
-            {/* <p className="text-white">Already a user login with one click:</p>
-            <button
-              onClick={handleLogin}
-              className="w-full  rounded bg-primaryGoldColor shadow-xl shadow-primaryGoldColor/50 hover:bg-primaryGoldColor/50 duration-500 text-white p-3"
-            >
-              Login{" "}
-            </button> */}
+            <p className="text-white">
+              Already a user{" "}
+              <span
+                onClick={handleLogin}
+                className="text-primaryGoldColor font-semibold uppercase cursor-pointer"
+              >
+                login
+              </span>{" "}
+            </p>
           </motion.div>
           {/* Features */}
           <div className=" flex flex-col justify-between gap-y-6">
