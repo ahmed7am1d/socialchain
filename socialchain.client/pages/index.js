@@ -23,27 +23,6 @@ export default function IndexPage() {
         className=" h-screen 
         max-w-7xl m-auto p-5  relative"
       >
-        {/* <motion.div
-          initial={{
-            opacity: 0,
-            y: -500,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          transition={{
-            duration: 2,
-          }}
-        >
-          <Image
-            src={socialchainLogo}
-            width="250"
-            height="250"
-            alt="Website Logo"
-            className=" absolute -top-20 bottom-0 left-0 right-0 mb-4"
-          />
-        </motion.div> */}
         {/* Left and right section */}
         <section
           className="
@@ -191,7 +170,9 @@ export default function IndexPage() {
         </section>
       </div>
       {/* Random Images */}
-      <div className="absolute top-24 left-96 right-0 w-fit">
+      <div className="absolute 
+      top-4
+       lg:top-24 lg:left-96 lg:right-0 w-fit">
         <div className="absolute -inset-0.5 bg-gradient-to-t from-primaryGoldColorTrans to-secondaryGold rounded-full blur-xl"></div>
         <motion.div
           className="
@@ -219,7 +200,7 @@ export default function IndexPage() {
           />
         </motion.div>
       </div>
-      <div className="absolute bottom-20  right-32 w-fit">
+      <div className="absolute bottom-20 right-4 lg:bottom-20  lg:right-32 w-fit">
         <div className="absolute -inset-0.5 bg-gradient-to-t from-primaryGoldColorTrans to-secondaryGold rounded-full blur-xl"></div>
 
         <motion.div
@@ -249,7 +230,7 @@ export default function IndexPage() {
           />
         </motion.div>
       </div>
-      <div className="absolute bottom-20 left-40 right-0 w-fit">
+      <div className="absolute bottom-80 left-4 right-0 lg:bottom-20 lg:left-40 lg:right-0 w-fit">
         <div className="absolute -inset-0.5 bg-gradient-to-t from-darkBlack to-white rounded-full blur-xl"></div>
 
         <motion.div

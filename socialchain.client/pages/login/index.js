@@ -524,7 +524,7 @@ const login = () => {
           isRegisterModalOpen && "blur bg-darkBlack opacity-50"
         }`}
       >
-        <div className="grid grid-cols-2 h-full gap-x-6">
+        <div className="lg:grid lg:grid-cols-2 h-full lg:gap-x-6 flex flex-col gap-y-4 ">
           {/* Wallets */}
           <motion.div
             className={`bg-darkBlueHalfTrans rounded-md p-5 space-y-10 ${classes.walletsContainer} `}
