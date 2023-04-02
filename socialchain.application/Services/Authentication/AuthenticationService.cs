@@ -136,5 +136,15 @@ namespace socialchain.application.Services.Authentication
                 newUser
                 );
         }
+
+        public ErrorOr<RegistrationResult> IsRegistered(string accountAddress)
+        {
+           var user = _userRepository.GetUserByAccountAddress(accountAddress);
+            if (user is null)
+            {
+                return Errors.Registration.UnRegistered;
+            }
+            return new RegistrationResult(true);
+        }
     }
 }
