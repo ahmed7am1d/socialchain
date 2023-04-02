@@ -59,7 +59,7 @@ export const isRegisteredUser = async (accountAddress) => {
     const response = await SocialChainApi.get(
       `${SocialChainApiConstants.REGISTERED_ENDPOINT}?accountaddress=${accountAddress}`
     );
-    
+    return true;
   } catch (error) {
     //return error message
     return await error?.response?.data?.errors[0].description;
