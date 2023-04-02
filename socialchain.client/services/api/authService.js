@@ -26,7 +26,7 @@ export const verify = async (tempToken, signature) => {
     );
     return response.data;
   } catch (error) {
-    console.log("Printing the Error message => ",error?.response);
+    console.log("Printing the Error message => ", error?.response);
     //return error message
     return await error?.response;
   }
@@ -36,8 +36,7 @@ export const verify = async (tempToken, signature) => {
 export const refreshToken = async () => {
   try {
     const response = await SocialChainApi.post(
-      SocialChainApiConstants.REFRESHTOKEN_ENDPOINT,
-
+      SocialChainApiConstants.REFRESHTOKEN_ENDPOINT
     );
     console.log(response);
   } catch (error) {
@@ -50,8 +49,20 @@ export const logOut = async () => {
   try {
     const response = await SocialChainApi.post(
       SocialChainApiConstants.LOGOUT_ENDPOINT
-    )
-  } catch (error) {
+    );
+  } catch (error) {}
+};
 
+//Checking user is registered
+export const isRegisteredUser = async (accountAddress) => {
+  try {
+    const response = await SocialChainApi.get(
+      `${SocialChainApiConstants.REGISTERED_ENDPOINT}?accountaddress=${accountAddress}`
+    );
+    
+  } catch (error) {
+    //return error message
+    return await error?.response?.data?.errors[0].description;
   }
-}
+  return false;
+};

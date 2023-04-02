@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Checkbox, message } from "antd";
 import { ethers, providers } from "ethers";
-import { nonce, verify } from "@/services/api/authService";
+import { isRegisteredUser, nonce, verify } from "@/services/api/authService";
 import useAuth from "@/hooks/useAuth";
 import { useRouter } from "next/router";
 import cookie from "cookie";
@@ -33,6 +33,7 @@ import SocialChainContractConstants from "@/constants/blockchain/SocialChainCont
 import SocialChainContract from "../../contract-artifacts/contracts/SocialChain.sol/SocialChain.json";
 import { euDateToISO8601, iSO8601ToUnixDate } from "@/utils/Date/dateUtils";
 import extractContractErrorMessage from "@/utils/Errors/extractContractErrorMessageUtils";
+import { LottieAnimation } from "@/components/Animations/LottieAnimation";
 
 export async function getServerSideProps(context) {
   //Catching the error if no cookies exists
@@ -250,38 +251,51 @@ const login = () => {
     if (window.ethereum) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       //let the user connect to his account
+      //add try here:
       const accountAddresses = await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
-
-      //[A]- nonce
-      const messageTempToken = await nonce(accountAddresses[0]);
-      //[B]- get user signature
-      let signature = "";
-      try {
-        signature = await signer.signMessage(messageTempToken.message);
-        //[C]- verify and get accessToken
-        const accessTokenAndDataResult = await verify(
-          messageTempToken.tempToken,
-          signature
-        );
-        if (accessTokenAndDataResult?.status > 206) {
+      const isRegisteredUserResult = await isRegisteredUser(
+        accountAddresses[0]
+      );
+      console.log(isRegisteredUserResult);
+      if (isRegisteredUserResult === true) {
+        console.log("Registered User");
+        //[A]- nonce
+        const messageTempToken = await nonce(accountAddresses[0]);
+        //[B]- get user signature
+        let signature = "";
+        try {
+          signature = await signer.signMessage(messageTempToken.message);
+          //[C]- verify and get accessToken
+          const accessTokenAndDataResult = await verify(
+            messageTempToken.tempToken,
+            signature
+          );
+          if (accessTokenAndDataResult?.status > 206) {
+            messageApi.open({
+              type: "error",
+              content: accessTokenAndDataResult?.data?.title,
+            });
+            return false;
+          }
+          //[5]- Forward the user to the login page with sending parameters
+          router.push(
+            {
+              pathname: "/home/profile",
+            },
+            "./home/profile"
+          );
+        } catch (e) {
           messageApi.open({
             type: "error",
-            content: accessTokenAndDataResult?.data?.title,
+            content: "You have to sign the message to register to get JWT !!",
           });
           return false;
         }
-        //[5]- Forward the user to the login page with sending parameters
-        router.push(
-          {
-            pathname: "/home/profile",
-          },
-          "./home/profile"
-        );
-      } catch (e) {
+      } else {
         messageApi.open({
           type: "error",
-          content: "You have to sign the message to register to get JWT !!",
+          content: isRegisteredUserResult,
         });
         return false;
       }
@@ -300,7 +314,7 @@ const login = () => {
     <>
       {contextHolder}
       {/* Background curve */}
-      <div className="absolute w-screen h-[300px]  bg-primaryPinkColorTrans top-60 -z-1 -skew-y-12 transform-gpu origin-top bottom-0"></div>
+      <div className="absolute w-screen h-[300px]  bg-primaryGoldColorTrans top-60 -z-1 -skew-y-12 transform-gpu origin-top bottom-0"></div>
       {/* Register modal*/}
       <motion.div
         id="authentication-modal"
@@ -348,7 +362,7 @@ const login = () => {
             <div className="px-6 py-6 lg:px-8">
               <h3 className="mb-4 text-xl font-medium text-gray-900 dark:text-white">
                 Sign up to{" "}
-                <span className=" bg-primaryPinkColor rounded-md p-1">
+                <span className=" bg-primaryGoldColor rounded-md p-1">
                   Social chain
                 </span>
               </h3>
@@ -468,7 +482,7 @@ const login = () => {
                         alt="User profile container"
                       />
                     ) : (
-                      <div className=" w-32 h-32 rounded-full duration-200  mb-10 bg-primaryPinkColorTrans mt-0"></div>
+                      <div className=" w-32 h-32 rounded-full duration-200  mb-10 bg-primaryGoldColorTrans mt-0"></div>
                     )}
                     {selectedProfilePictureSrc ? (
                       <div
@@ -494,7 +508,7 @@ const login = () => {
                 {/* Continue button */}
                 <button
                   type="submit"
-                  className="w-full text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-primaryPinkColor "
+                  className="w-full text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-primaryGoldColor "
                 >
                   Continue
                 </button>
@@ -603,18 +617,20 @@ const login = () => {
             <button
               data-modal-target="authentication-modal"
               data-modal-toggle="authentication-modal"
-              className="w-full  rounded bg-primaryPinkColor shadow-xl shadow-primaryPinkColor/50 hover:bg-primaryPinkColor/50 duration-500 text-white p-3"
+              className="w-full  rounded bg-primaryGoldColor shadow-xl shadow-primaryGoldColor/50 hover:bg-primaryGoldColor/50 duration-500 text-white p-3"
               onClick={handleRegisterModal}
             >
               REGISTER NOW TO SOCIAL CHAIN
             </button>
-            <p className="text-white">Already a user login with one click:</p>
-            <button
-              onClick={handleLogin}
-              className="w-full  rounded bg-primaryPinkColor shadow-xl shadow-primaryPinkColor/50 hover:bg-primaryPinkColor/50 duration-500 text-white p-3"
-            >
-              Login{" "}
-            </button>
+            <p className="text-white">
+              Already a user{" "}
+              <span
+                onClick={handleLogin}
+                className="text-primaryGoldColor font-semibold uppercase cursor-pointer"
+              >
+                login
+              </span>{" "}
+            </p>
           </motion.div>
           {/* Features */}
           <div className=" flex flex-col justify-between gap-y-6">
@@ -634,11 +650,10 @@ const login = () => {
               }}
             >
               <div className="flex  justify-center">
-                <Image
-                  src={perofrmanceImage}
-                  alt="Performance growth"
-                  height={200}
+                <LottieAnimation
+                  fileName="blockchainPerformanceAnimation.json"
                   width={200}
+                  divId="blockchainPerformanceAnimation"
                 />
               </div>
               <h1 className="text-2xl font-semibold text-white">Performance</h1>
@@ -667,11 +682,10 @@ const login = () => {
               }}
             >
               <div className="flex justify-center">
-                <Image
-                  src={transparencyImage}
-                  alt="Transparency"
-                  height={200}
+                <LottieAnimation
+                  fileName="106808-blockchain.json"
                   width={200}
+                  divId="106808-blockchain"
                 />
               </div>
               <h1 className="text-2xl font-semibold text-white">

@@ -17,7 +17,7 @@ export default function IndexPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <link rel="icon" href="/blockchain.ico" />
       </Head>
-      <div className="absolute w-screen h-[300px] bg-primaryPinkColorTrans top-60 -z-1 -skew-y-12 transform-gpu origin-top bottom-0"></div>
+      <div className="absolute w-screen h-[300px] bg-primaryGoldColorTrans top-60 -z-1 -skew-y-12 transform-gpu origin-top bottom-0"></div>
 
       <div
         className=" h-screen 
@@ -73,12 +73,12 @@ export default function IndexPage() {
             }}
             className=" text-center lg:text-left"
           >
-            <h1 className="text-3xl text-primaryPinkColor first-letter:bg-white first-letter:px-[2px] font-bold">
+            <h1 className="text-3xl text-primaryGoldColor first-letter:bg-white first-letter:px-[2px] font-bold">
               Social chain
             </h1>
             <p className="p-1 text-md xl:mr-36 font-poppins">
               Social chain is a{" "}
-              <span className=" text-primaryPinkColor font-semibold font-serif">
+              <span className=" text-primaryGoldColor font-semibold font-serif">
                 decentralized media platform
               </span>{" "}
               built on the top of Ethereum - polygon. With this platform you can
@@ -106,7 +106,7 @@ export default function IndexPage() {
                 duration: 1.6,
               }}
             >
-              <button className="bg-primaryPinkColor p-3 rounded-lg shadow-lg shadow-primaryPinkColor/50 hover:bg-primaryPinkColor/50 duration-500">
+              <button className="bg-primaryGoldColor p-3 rounded-lg shadow-lg shadow-primaryGoldColor/50 hover:bg-primaryGoldColor/50 duration-500">
                 <Link href="/login">
                   START NOW{" "}
                   <span className="text-white/60 font-serif font-semibold">
@@ -134,7 +134,7 @@ export default function IndexPage() {
                 }}
               >
                 <ShieldCheck
-                  className="text-primaryPinkColor"
+                  className="text-primaryGoldColor"
                   size={37}
                   weight="fill"
                 />
@@ -157,7 +157,7 @@ export default function IndexPage() {
                 }}
               >
                 <Detective
-                  className="text-primaryPinkColor"
+                  className="text-primaryGoldColor"
                   size={37}
                   weight="fill"
                 />
@@ -180,7 +180,7 @@ export default function IndexPage() {
                 }}
               >
                 <FolderSimpleLock
-                  className="text-primaryPinkColor"
+                  className="text-primaryGoldColor"
                   size={37}
                   weight="fill"
                 />
@@ -192,7 +192,7 @@ export default function IndexPage() {
       </div>
       {/* Random Images */}
       <div className="absolute top-24 left-96 right-0 w-fit">
-        <div className="absolute -inset-0.5 bg-gradient-to-t from-primaryPinkColorTrans to-secondaryGold rounded-full blur-xl"></div>
+        <div className="absolute -inset-0.5 bg-gradient-to-t from-primaryGoldColorTrans to-secondaryGold rounded-full blur-xl"></div>
         <motion.div
           className="
             h-20 w-20
@@ -220,7 +220,7 @@ export default function IndexPage() {
         </motion.div>
       </div>
       <div className="absolute bottom-20  right-32 w-fit">
-        <div className="absolute -inset-0.5 bg-gradient-to-t from-primaryPinkColorTrans to-secondaryGold rounded-full blur-xl"></div>
+        <div className="absolute -inset-0.5 bg-gradient-to-t from-primaryGoldColorTrans to-secondaryGold rounded-full blur-xl"></div>
 
         <motion.div
           className="
