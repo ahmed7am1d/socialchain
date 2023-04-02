@@ -11,22 +11,19 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        'poppins': ['Poppins'],
-        'lobster':['Lobster'],
-        'montserrat':['Montserrat']
+        poppins: ["Poppins"],
+        "Arimo-navbar-font": ["Arimo"]
       },
       colors: {
         darkBlack: "#1C1E21",
-        darkBlue:"#1E2B3D",
-        darkBlueHalfTrans:"rgb(29, 35, 44)",
-        primaryPinkColor: "#F213A4",
-        primaryPinkColorTrans: "#f213a499",
+        darkBlue: "#1E2B3D",
+        darkBlueHalfTrans: "rgb(29, 35, 44)",
+        primaryGoldColor: "#e0a500",
+        primaryGoldColorTrans: "#343434",
         secondaryGold: "#BC9F4F",
-        grayTextColor:"#b5b3b3c3"
+        grayTextColor: "#b5b3b3c3",
       },
     },
   },
-  plugins: [
-    require('tailwind-scrollbar')
-  ],
+  plugins: [require("tailwind-scrollbar")],
 };

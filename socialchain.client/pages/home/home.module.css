@@ -6,7 +6,7 @@
   cursor: pointer;
 }
 .homePageLeftNavigationWrapper li:hover {
-  background-color: #f213a499;
+  background-color: #e0a500;
   transition: 1s;
   border-radius: 8px;
 }
@@ -55,7 +55,7 @@
 }
 
 .feedNavigationWrapper li::after {
-  background-color: #f213a499;
+  background-color: #e0a500;
   content: "";
   position: absolute;
   width: 100%;
