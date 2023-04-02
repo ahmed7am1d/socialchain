@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Checkbox, message } from "antd";
 import { ethers, providers } from "ethers";
-import { nonce, verify } from "@/services/api/authService";
+import { isRegisteredUser, nonce, verify } from "@/services/api/authService";
 import useAuth from "@/hooks/useAuth";
 import { useRouter } from "next/router";
 import cookie from "cookie";
@@ -34,6 +34,7 @@ import SocialChainContract from "../../contract-artifacts/contracts/SocialChain.
 import { euDateToISO8601, iSO8601ToUnixDate } from "@/utils/Date/dateUtils";
 import extractContractErrorMessage from "@/utils/Errors/extractContractErrorMessageUtils";
 import { LottieAnimation } from "@/components/Animations/LottieAnimation";
+
 export async function getServerSideProps(context) {
   //Catching the error if no cookies exists
   try {
@@ -250,38 +251,51 @@ const login = () => {
     if (window.ethereum) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       //let the user connect to his account
+      //add try here:
       const accountAddresses = await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
-
-      //[A]- nonce
-      const messageTempToken = await nonce(accountAddresses[0]);
-      //[B]- get user signature
-      let signature = "";
-      try {
-        signature = await signer.signMessage(messageTempToken.message);
-        //[C]- verify and get accessToken
-        const accessTokenAndDataResult = await verify(
-          messageTempToken.tempToken,
-          signature
-        );
-        if (accessTokenAndDataResult?.status > 206) {
+      const isRegisteredUserResult = await isRegisteredUser(
+        accountAddresses[0]
+      );
+      console.log(isRegisteredUserResult);
+      if (isRegisteredUserResult === true) {
+        console.log("Registered User");
+        //[A]- nonce
+        const messageTempToken = await nonce(accountAddresses[0]);
+        //[B]- get user signature
+        let signature = "";
+        try {
+          signature = await signer.signMessage(messageTempToken.message);
+          //[C]- verify and get accessToken
+          const accessTokenAndDataResult = await verify(
+            messageTempToken.tempToken,
+            signature
+          );
+          if (accessTokenAndDataResult?.status > 206) {
+            messageApi.open({
+              type: "error",
+              content: accessTokenAndDataResult?.data?.title,
+            });
+            return false;
+          }
+          //[5]- Forward the user to the login page with sending parameters
+          router.push(
+            {
+              pathname: "/home/profile",
+            },
+            "./home/profile"
+          );
+        } catch (e) {
           messageApi.open({
             type: "error",
-            content: accessTokenAndDataResult?.data?.title,
+            content: "You have to sign the message to register to get JWT !!",
           });
           return false;
         }
-        //[5]- Forward the user to the login page with sending parameters
-        router.push(
-          {
-            pathname: "/home/profile",
-          },
-          "./home/profile"
-        );
-      } catch (e) {
+      } else {
         messageApi.open({
           type: "error",
-          content: "You have to sign the message to register to get JWT !!",
+          content: isRegisteredUserResult,
         });
         return false;
       }
