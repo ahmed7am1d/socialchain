@@ -107,7 +107,7 @@ export const Feed = () => {
               </div>
             </div>
             <div>
-              <button className=" bg-primaryGoldColorTrans px-5 py-2 rounded-sm shadow-xl">
+              <button className=" bg-secondaryGold text-white px-5 py-2 rounded-sm shadow-xl">
                 Share
               </button>
             </div>
