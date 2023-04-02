@@ -19,8 +19,8 @@ module.exports = {
         darkBlack: "#1C1E21",
         darkBlue:"#1E2B3D",
         darkBlueHalfTrans:"rgb(29, 35, 44)",
-        primaryPinkColor: "#F213A4",
-        primaryPinkColorTrans: "#f213a499",
+        primaryGoldColor: "#e0a500",
+        primaryGoldColorTrans: "#343434",
         secondaryGold: "#BC9F4F",
         grayTextColor:"#b5b3b3c3"
       },

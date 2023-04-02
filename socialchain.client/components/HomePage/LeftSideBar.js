@@ -51,7 +51,7 @@ export const LeftSideBar = () => {
         </div>
 
         <h1
-          className={`text-center text-xl font-semibold text-white first-letter:bg-primaryPinkColor`}
+          className={`text-center text-xl font-semibold text-white first-letter:bg-primaryGoldColor`}
         >
           Social Chain
         </h1>
