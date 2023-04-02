@@ -87,7 +87,7 @@ namespace ToDo.Api.Controllers
         }
 
         [HttpGet("check-registration")]
-        public IActionResult CheckUserRegistration([FromBody] IsRegisteredRequest isRegisterRequest)
+        public IActionResult CheckUserRegistration([FromQuery] IsRegisteredRequest isRegisterRequest)
         {
             ErrorOr<RegistrationResult> registeredResult = _authenticationService.IsRegistered(isRegisterRequest.AccountAddress);
             if (registeredResult.IsError)
