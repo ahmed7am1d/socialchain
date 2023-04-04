@@ -5,22 +5,15 @@ pragma solidity ^0.8.18;
 import "hardhat/console.sol";
 
 contract SocialChain {
-    //#region Varaibles/states
     address payable public owner; //Owner is also a maintainer
     uint public totalUsers = 0;
-
-    //#endregion
-
-    //#region  Contract constructor
+    uint public totalPosts = 0;
 
     constructor() {
         owner = payable(msg.sender);
         registerUser("owner", "owner", "", "", "owner", 1, true);
     }
 
-    //#endregion
-
-    //#region Structs
     struct User {
         uint id;
         address ethAddress;
@@ -43,6 +36,7 @@ contract SocialChain {
         uint timeStamp;
         uint likeCount;
         uint reportCount;
+        postStatus status;
     }
 
     struct Comment {
@@ -54,42 +48,39 @@ contract SocialChain {
         uint reportCount;
         uint timeStamp;
     }
-    //#endregion
-
-    //#region Mapping/HashMaps
 
     //mapping to get user details from user address
     mapping(address => User) private users;
-    //mapping to get user address from userName
+    //mapping to get user ad    dress from userName
     mapping(string => address) private userAddressFromUserName;
     //mapping to check which username is taken
     mapping(string => bool) private usernames;
 
-
     //mapping to get a post by post Id
-    mapping (uint => Post) private posts;
+    mapping(uint => Post) private posts;
     //mapping or list to store all postsId that is done by specific user (user address)
-    mapping (address => uint[]) private userPosts;
+    mapping(address => uint[]) private userPosts;
     //mapping to track who like which post
-    // mapping(uint=>mapping(address=>bool)) private postLikers;
-    
-    //#endregion
+    mapping(uint => mapping(address => bool)) private postLikers;
 
-    //#region Event to be emitted
     event logRegisterUser(address userAddress, uint userId);
+    event logPostCreated(address _author, uint _userId, uint _postId);
 
-    //#endregion
-
-    //#region enums
     enum accountStatus {
+        //NP Stand for = Not present
         NP,
         Active,
         Banned,
         Deactived
     }
-    //#endregion
 
-    //#region Modifiers/checkers
+    enum postStatus {
+        NP,
+        Active,
+        Banned,
+        Deleted
+    }
+
     modifier checkUserNotRegisteredByAddress(address userAddress) {
         require(
             users[userAddress].status == accountStatus.NP,
@@ -102,13 +93,19 @@ contract SocialChain {
         _;
     }
 
-    //#endregion
-
-    //#region Functions
-    function greetings() public pure returns (string memory) {
-        return "Welcome to the Social chain platform :)";
+    modifier onlyAllowedUser(address userAddress){
+        require(users[userAddress].status == accountStatus.Active,"Not a Registered User!");
+        _;
     }
 
+    modifier onlyActivePost(uint postId) {
+        require(posts[postId].status == postStatus.Active, "Not an active post");
+        _;
+    }
+
+/*
+**************************************USER FUNCTIONS********************************************************************************
+*/
     function userNameAvailable(
         string memory _username
     ) public view returns (bool status) {
@@ -154,7 +151,9 @@ contract SocialChain {
         emit logRegisterUser(msg.sender, id);
     }
 
-    function getUser(address accountAddress)
+    function getUser(
+        address accountAddress
+    )
         public
         view
         returns (
@@ -181,6 +180,45 @@ contract SocialChain {
             u.profileCoverImgHash
         );
     }
+/*
+**************************************POST FUNCTIONS***********************************************************
+*/
+//--------ATTENTIONS:
+//-- THIS FUNCTION NEED TO BE MODIFIED SO THAT ONLY ALLOWED USERS CAN POST 
+//-- The function should create the post by only the message sender address not by sending the address
+    function createPost(
+        address payable _accountAddress,
+        string memory _postdescription,
+        string memory _imghash
+    ) public {
+        totalPosts = totalPosts + 1;
+        uint postId = totalPosts;
+        posts[postId] = Post(
+            postId,
+            _accountAddress,
+            _postdescription,
+            _imghash,
+            block.timestamp,
+            0,
+            0,
+            postStatus.Active
+        );
+        //each user will have an array of postId that he posted
+        userPosts[_accountAddress].push(postId);
+        emit logPostCreated(_accountAddress, users[_accountAddress].id, postId);
+    }
 
-    //#endregion
+    function getPostById(uint _postId) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) view returns (Post memory) {
+        return posts[_postId];
+    }
+
+    function getUserPosts(address _userAddress) public onlyAllowedUser(_userAddress) view returns (Post[] memory postList) {
+        uint[] memory postIds = userPosts[_userAddress];
+        Post[] memory userPostsTemp = new Post[](postIds.length);
+        for (uint i =0 ; i < postIds.length ; i++) {
+            userPostsTemp[i] = posts[postIds[i]];
+        }
+    return userPostsTemp;
+    }
+
 }

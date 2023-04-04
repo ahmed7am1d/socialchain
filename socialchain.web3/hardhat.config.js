@@ -34,15 +34,59 @@ task("balance", "Prints an account's balance")
     const balance = await ethers.provider.getBalance(taskArgs.account);
     console.log(ethers.utils.formatEther(balance), "ETH");
   });
-  //[3]- Get user details
-  task("social-chain-user","Get the user details that calls the function")
-  .addParam("accountaddress","The account address")
-  .setAction(async (taskArgs)=> {
+//[3]- Get user details
+task("social-chain-user", "Get the user details that calls the function")
+  .addParam("accountaddress", "The account address")
+  .setAction(async (taskArgs) => {
     const MyContract = await ethers.getContractFactory("SocialChain");
     const contract = await MyContract.attach(
       "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     );
     const result = await contract.getUser(taskArgs.accountaddress);
+    console.log(result);
+  });
+//[4]- Create new post
+task("create-post", "Create new post")
+  .addParam("accountaddress", "The account address")
+  .addParam("postdes", "Post description")
+  .addParam("imghash", "hash of the image in IPFS")
+  .setAction(async (taskArgs) => {
+    const MyContract = await ethers.getContractFactory("SocialChain");
+    const contract = await MyContract.attach(
+      "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+    );
+    const result = await contract.createPost(
+      taskArgs.accountaddress,
+      taskArgs.postdes,
+      taskArgs.imghash
+    );
+    console.log(result);
+  });
+  //[5]- Get a post by id
+  task("get-post-byid","Get a post by id")
+  .addParam("postid", "The post id")
+  .setAction(async (taskArgs) => {
+    const MyContract = await ethers.getContractFactory("SocialChain");
+    const contract = await MyContract.attach(
+      "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+    );
+    const result = await contract.getPost(
+      taskArgs.postid
+    );
+    console.log(result);
+  })
+
+  //[6]- Get all user post 
+  task("get-user-posts","Get all users post")
+  .addParam("accountaddress", "The account address")
+  .setAction( async (taskArgs) => {
+    const MyContract = await ethers.getContractFactory("SocialChain");
+    const contract = await MyContract.attach(
+      "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+    );
+    const result = await contract.getUserPosts(
+      taskArgs.accountaddress
+    );
     console.log(result);
   })
 //#endregion
