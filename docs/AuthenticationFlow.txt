@@ -4,9 +4,9 @@
 
 1- user connect his wallet 
 	- YES => 
-		2- retrive user account address
-		3- Call back-end api end point to make sure if the user is registered and send the account address 
-		4- user is registered ? 
+		1- retrive user account address
+		2- Call back-end api end point to make sure if the user is registered and send the account address 
+		3- user is registered ? 
 			- Yes:
 				1- Call the api end point /nonce with sending account address 
 				2- Back-end => 

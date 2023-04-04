@@ -29,6 +29,7 @@ export const RightSideBar = () => {
               src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
               layout="fill"
               objectFit="cover"
+              alt="Profile picture"
             />
           </div>
         </div>

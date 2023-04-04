@@ -11,7 +11,7 @@ const HomePageLayout = ({ children }) => {
     async function setUserInformation() {
       //[1]- Get user object from the contract
       const provider = new ethers.providers.Web3Provider(window.ethereum);
-       const accountAddresses = await provider.send("eth_requestAccounts", []);
+      const accountAddresses = await provider.send("eth_requestAccounts", []);
       const contract = new ethers.Contract(SocialChainContractConstants.SOCIAL_CHAIN_CONTRACT_ADDRESS, socialChainContractABI.abi, provider);
       const result = await contract.getUser(accountAddresses[0]);
       const user = {
