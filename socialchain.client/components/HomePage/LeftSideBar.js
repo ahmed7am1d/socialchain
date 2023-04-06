@@ -28,7 +28,7 @@ export const LeftSideBar = () => {
     router.push("/login");
   };
   return (
-    <aside className={`p-5 bg-darkBlueHalfTrans ${styles.asideWrapper}`}>
+    <aside className={`p-5 bg-darkBlueHalfTrans  ${styles.asideWrapper}`}>
       {/* title */}
       <div
         className={`flex items-center gap-x-1 ${styles.socialChainLogoWrapper}`}

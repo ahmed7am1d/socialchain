@@ -153,14 +153,27 @@ event logRegisterUser(address userAddress, uint userId);
   ##### A- Function to create new post
  ><span style="color:red">Only active (registered user) is able to add new post</span>.
  ```
- function createPost(address payable _accountAddress,string memory _postdescription,string memory _imghash) public
-    {
+    function createPost(
+        address payable _accountAddress,
+        string memory _postdescription,
+        string memory _imghash
+    ) public {
         totalPosts = totalPosts + 1;
         uint postId = totalPosts;
-        posts[postId] = Post(postId,_accountAddress,_postdescription,_imghash,block.timestamp,0,0);
+        posts[postId] = Post(
+            postId,
+            _accountAddress,
+            _postdescription,
+            _imghash,
+            block.timestamp,
+            0,
+            0,
+            postStatus.Active
+        );
         //each user will have an array of postId that he posted
         userPosts[_accountAddress].push(postId);
-        emit logPostCreated(_accountAddress,users[_accountAddress].id,postId);
+        postIds.push(postId);
+        emit logPostCreated(_accountAddress, users[_accountAddress].id, postId);
     }
  ```
  ##### B- Function to get post by postId
@@ -176,15 +189,36 @@ event logRegisterUser(address userAddress, uint userId);
   ##### C- Function to get a list o posts that is posted by a user
    ><span style="color:red">Only active (registered user) is able to retrieve a post from the contract</span>.
  ```
-function getUserPosts(address _userAddress) public onlyAllowedUser(_userAddress) view returns (Post[] memory postList) {
-        uint[] memory postIds = userPosts[_userAddress];
-        Post[] memory userPosts = new Post[](postIds.length);
-        for (uint i =0 ; i < postIds.length ; i++) {
-            userPosts[i] = posts[postIds[i]];
+    function getUserPosts(
+        address _userAddress
+    ) public view onlyAllowedUser(_userAddress) returns (Post[] memory) {
+        uint[] memory userPostIds = userPosts[_userAddress];
+        Post[] memory userPostsTemp = new Post[](userPostIds.length);
+        for (uint i = 0; i < userPostIds.length; i++) {
+            userPostsTemp[i] = posts[userPostIds[i]];
         }
-    return userPosts;
+        return userPostsTemp;
     }
  ```
+  ##### D- Function to get all the social chain contract's postIds
+  > Note: Only allowed users (registered + active) are able to call this function
+  ```
+   function getPostIds(
+        uint _page,
+        uint _perPage
+    ) public view onlyAllowedUser(msg.sender) returns (uint[] memory) {
+        uint start = (_page - 1) * _perPage;
+        uint end = start + _perPage;
+        if (end > postIds.length) {
+            end = postIds.length;
+        }
+        uint[] memory result = new uint[](end - start);
+        for(uint i = start ; i < end; i++) {
+            result[i-start] = postIds[i];
+        }
+        return result;
+    }
+  ```
 
 #### 4- Post events
  A- event to be emitted when a post is created
@@ -276,7 +310,10 @@ modifier onlyActivePost(uint postId) {
 ```
     uint public totalPosts = 0;
 ```
-
+- This state is used to store all the postsIds in the contract
+```
+    uint[] private postIds;
+```
 
 ##### 2- Contract constructor: 
 - Whenever the contract is deployed an owner will be the one who deployed the contract

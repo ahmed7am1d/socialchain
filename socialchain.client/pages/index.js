@@ -7,6 +7,7 @@ import socialchainLogo from "../assets/logos/socialchain.png";
 import indexImage1 from "../assets/Images/indexImage1.jpg";
 import indexImage2 from "../assets/Images/indexImage2.png";
 import indexImage3 from "../assets/Images/indexImage3.png";
+import { Typewriter } from "react-simple-typewriter";
 
 export default function IndexPage() {
   return (
@@ -14,7 +15,7 @@ export default function IndexPage() {
       <Head>
         <title>Social chain</title>
         <meta name="description" content="Social chain" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/blockchain.ico" />
       </Head>
       <div className="absolute w-screen h-[300px] bg-primaryGoldColorTrans top-60 -z-1 -skew-y-12 transform-gpu origin-top bottom-0"></div>
@@ -66,6 +67,19 @@ export default function IndexPage() {
               interacting between you and your data. in this platform JWT is
               used to make sure that your data is even more secure
             </p>
+            <span className="font-bold text-lg">{"< "}</span>
+            <span className="text-md font-semibold text-primaryGoldColor">
+              <Typewriter
+                words={["Secure", "Safe", "Fast", "No password needed !"]}
+                loop={false}
+                cursor
+                cursorStyle="_"
+                typeSpeed={70}
+                deleteSpeed={50}
+                delaySpeed={1000}
+              />
+            </span>
+            <span className="font-bold text-lg">{"/>"}</span>
           </motion.div>
           {/* Right side */}
           <div>
@@ -170,9 +184,11 @@ export default function IndexPage() {
         </section>
       </div>
       {/* Random Images */}
-      <div className="absolute 
+      <div
+        className="absolute 
       top-4
-       lg:top-24 lg:left-96 lg:right-0 w-fit">
+       lg:top-24 lg:left-96 lg:right-0 w-fit"
+      >
         <div className="absolute -inset-0.5 bg-gradient-to-t from-primaryGoldColorTrans to-secondaryGold rounded-full blur-xl"></div>
         <motion.div
           className="

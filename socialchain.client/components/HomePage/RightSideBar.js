@@ -2,7 +2,6 @@ import React from "react";
 import indexImage1 from "@/assets/Images/indexImage1.jpg";
 import indexImage2 from "@/assets/Images/indexImage2.png";
 import indexImage3 from "@/assets/Images/indexImage3.png";
-import { motion } from "framer-motion";
 import Image from "next/image";
 import { BellOutlined, MailFilled } from "@ant-design/icons";
 import useAuth from "@/hooks/useAuth";

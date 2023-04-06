@@ -4,11 +4,12 @@
   padding-left: 5px;
   padding-right: 5px;
   cursor: pointer;
+  border-radius: 8px;
+  transition: .5s;
 }
 .homePageLeftNavigationWrapper li:hover {
   background-color: #e0a500;
-  transition: 1s;
-  border-radius: 8px;
+  transition: .5s;
 }
 
 
@@ -52,6 +53,7 @@
   cursor: pointer;
   width: 80px;
   text-align: center;
+  transition: .5s;
 }
 
 .feedNavigationWrapper li::after {
@@ -64,13 +66,13 @@
   bottom: 0;
   left: 0;
   right: 0;
-  display: none;
+  opacity: 0;
+  transition: .5s;
 }
 
 .feedNavigationWrapper li::before {
   background-color: gray;
-  display: none;
-  opacity: 0.1;
+  opacity: 0;
   content: "";
   position: absolute;
   width: 100%;
@@ -80,12 +82,14 @@
   bottom: 0;
   left: 0;
   right: 0;
+  transition: .5s;
+}
 
-}
 .feedNavigationWrapper li:hover::after {
-  display: block;
+  opacity: 0.3;
 }
+
 .feedNavigationWrapper li:hover::before {
-  display: block;
+  opacity: 0.3;
 }
 /*#endregion feed navigation styles */

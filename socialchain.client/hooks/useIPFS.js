@@ -33,7 +33,6 @@ export default function useIPFS() {
       reader.onloadend = async () => {
         const buffer = Buffer.from(reader.result);
         const { cid } = await ipfs.add(buffer);
-        console.log(cid.toString());
         setIpfsFileHash(cid.toString());
         resolve(cid.toString()); // Return the resolved value of ipfsFileHash
       };
