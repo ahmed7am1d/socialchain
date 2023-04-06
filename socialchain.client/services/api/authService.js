@@ -38,7 +38,7 @@ export const refreshToken = async () => {
     const response = await SocialChainApi.post(
       SocialChainApiConstants.REFRESHTOKEN_ENDPOINT
     );
-    console.log(response);
+    console.log("Refresh token response => ",response);
   } catch (error) {
     console.log(error);
   }

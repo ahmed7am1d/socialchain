@@ -11,7 +11,7 @@ const profile = (props) => {
   return (
     <>
       <UserProfile />
-      <Feed />
+      <Feed isUserProfile={true}/>
     </>
   );
 };

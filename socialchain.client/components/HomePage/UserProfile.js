@@ -1,16 +1,11 @@
-import React, { useEffect } from "react";
-import { Feed } from "./Feed";
+import React from "react";
 import Image from "next/image";
 import userTempCover from "../../assets/Images/userTempCoverPhoto.jpg";
-import userTempProfilePicture from "../../assets/Images/userProfilePicture.jpg";
 import styles from "../../pages/home/home.module.css";
-import HomePageLayout from "@/layouts/homePageLayout";
 import useAuth from "@/hooks/useAuth";
 export const UserProfile = () => {
-  const { auth, setAuth } = useAuth();
-  useEffect(() => {
-    console.log("From UserProfile component => ", auth);
-  }, []);
+  const { auth } = useAuth();
+
   return (
     <section className="m-5 flex flex-col relative">
       {/* cover photo */}
@@ -71,16 +66,7 @@ export const UserProfile = () => {
             <p>Timeline</p>
           </li>
           <li>
-            <p>About</p>
-          </li>
-          <li>
             <p>Friends</p>
-          </li>
-          <li>
-            <p>Friends</p>
-          </li>
-          <li>
-            <p>More</p>
           </li>
         </ul>
       </div>

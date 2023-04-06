@@ -34,7 +34,7 @@ import SocialChainContract from "../../contract-artifacts/contracts/SocialChain.
 import { euDateToISO8601, iSO8601ToUnixDate } from "@/utils/Date/dateUtils";
 import extractContractErrorMessage from "@/utils/Errors/extractContractErrorMessageUtils";
 import { LottieAnimation } from "@/components/Animations/LottieAnimation";
-
+import { Typewriter } from "react-simple-typewriter";
 export async function getServerSideProps(context) {
   //Catching the error if no cookies exists
   try {
@@ -134,7 +134,6 @@ const login = () => {
         try {
           //Converting normal date to unix so that contract accept it
           const userBirthDateStringValue = userBirthDateString;
-          console.log(userBirthDateStringValue);
           const iSO8601Date = await euDateToISO8601(userBirthDateStringValue);
           const formattedUnixBirthDate = await iSO8601ToUnixDate(iSO8601Date);
           userRegisterObject.birthDate = formattedUnixBirthDate;
@@ -154,7 +153,6 @@ const login = () => {
           //transactionResult.events[0].userId
           //If the transaction is successful remember me should be stored:
           localStorage.setItem("rememberMe", "true");
-          console.log(transactionResult.events);
         } catch (error) {
           //Contract Error
           const errorMessage = extractContractErrorMessage(error.data.message);
@@ -257,7 +255,6 @@ const login = () => {
       const isRegisteredUserResult = await isRegisteredUser(
         accountAddresses[0]
       );
-      console.log(isRegisteredUserResult);
       if (isRegisteredUserResult === true) {
         console.log("Registered User");
         //[A]- nonce
@@ -527,7 +524,10 @@ const login = () => {
         <div className="lg:grid lg:grid-cols-2 h-full lg:gap-x-6 flex flex-col gap-y-4 ">
           {/* Wallets */}
           <motion.div
-            className={`bg-darkBlueHalfTrans rounded-md p-5 space-y-10 ${classes.walletsContainer} `}
+            className={`bg-white bg-opacity-10 bg-clip-padding rounded-md p-5 space-y-10 ${classes.walletsContainer} `}
+            style={{
+              backdropFilter: "blur(5px)",
+            }}
             initial={{
               opacity: 0,
               x: -500,
@@ -636,7 +636,10 @@ const login = () => {
           <div className=" flex flex-col justify-between gap-y-6">
             {/* Upper box */}
             <motion.div
-              className="h-1/2 bg-darkBlueHalfTrans  rounded-md text-center flex flex-col   justify-center"
+              className="h-1/2 bg-white  bg-opacity-10 bg-clip-padding rounded-md text-center flex flex-col   justify-center"
+              style={{
+                backdropFilter: "blur(5px)",
+              }}
               initial={{
                 opacity: 0,
                 y: -500,
@@ -668,7 +671,10 @@ const login = () => {
             </motion.div>
             {/* Lower box */}
             <motion.div
-              className="h-1/2 bg-darkBlueHalfTrans rounded-md text-center flex flex-col   justify-center"
+              className="h-1/2 bg-white  bg-opacity-10 bg-clip-padding rounded-md text-center flex flex-col   justify-center"
+              style={{
+                backdropFilter: "blur(5px)",
+              }}
               initial={{
                 opacity: 0,
                 y: 500,

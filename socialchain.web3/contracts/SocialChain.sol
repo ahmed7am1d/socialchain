@@ -8,6 +8,7 @@ contract SocialChain {
     address payable public owner; //Owner is also a maintainer
     uint public totalUsers = 0;
     uint public totalPosts = 0;
+    uint[] private postIds;
 
     constructor() {
         owner = payable(msg.sender);
@@ -29,7 +30,7 @@ contract SocialChain {
 
     struct Post {
         uint postId;
-        address payable author;
+        address author;
         string postDescription;
         //ipfs location for the image
         string imgHash;
@@ -93,19 +94,25 @@ contract SocialChain {
         _;
     }
 
-    modifier onlyAllowedUser(address userAddress){
-        require(users[userAddress].status == accountStatus.Active,"Not a Registered User!");
+    modifier onlyAllowedUser(address userAddress) {
+        require(
+            users[userAddress].status == accountStatus.Active,
+            "Not a Registered User!"
+        );
         _;
     }
 
     modifier onlyActivePost(uint postId) {
-        require(posts[postId].status == postStatus.Active, "Not an active post");
+        require(
+            posts[postId].status == postStatus.Active,
+            "Not an active post"
+        );
         _;
     }
 
-/*
-**************************************USER FUNCTIONS********************************************************************************
-*/
+    /*
+     **************************************USER FUNCTIONS********************************************************************************
+     */
     function userNameAvailable(
         string memory _username
     ) public view returns (bool status) {
@@ -180,22 +187,23 @@ contract SocialChain {
             u.profileCoverImgHash
         );
     }
-/*
-**************************************POST FUNCTIONS***********************************************************
-*/
-//--------ATTENTIONS:
-//-- THIS FUNCTION NEED TO BE MODIFIED SO THAT ONLY ALLOWED USERS CAN POST 
-//-- The function should create the post by only the message sender address not by sending the address
+
+    /*
+     **************************************POST FUNCTIONS***********************************************************
+     */
+    //--------ATTENTIONS:
+    //-- THIS FUNCTION NEED TO BE MODIFIED SO THAT ONLY ALLOWED USERS CAN POST
+    //-- The function should create the post by only the message sender address not by sending the address
     function createPost(
         address payable _accountAddress,
         string memory _postdescription,
         string memory _imghash
-    ) public {
+    ) public onlyAllowedUser(msg.sender) {
         totalPosts = totalPosts + 1;
         uint postId = totalPosts;
         posts[postId] = Post(
             postId,
-            _accountAddress,
+            msg.sender,
             _postdescription,
             _imghash,
             block.timestamp,
@@ -204,21 +212,48 @@ contract SocialChain {
             postStatus.Active
         );
         //each user will have an array of postId that he posted
-        userPosts[_accountAddress].push(postId);
-        emit logPostCreated(_accountAddress, users[_accountAddress].id, postId);
+        userPosts[msg.sender].push(postId);
+        postIds.push(postId);
+        emit logPostCreated(msg.sender, users[msg.sender].id, postId);
     }
 
-    function getPostById(uint _postId) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) view returns (Post memory) {
+    function getPostById(
+        uint _postId
+    )
+        public
+        view
+        onlyAllowedUser(msg.sender)
+        onlyActivePost(_postId)
+        returns (Post memory)
+    {
         return posts[_postId];
     }
 
-    function getUserPosts(address _userAddress) public onlyAllowedUser(_userAddress) view returns (Post[] memory postList) {
-        uint[] memory postIds = userPosts[_userAddress];
-        Post[] memory userPostsTemp = new Post[](postIds.length);
-        for (uint i =0 ; i < postIds.length ; i++) {
-            userPostsTemp[i] = posts[postIds[i]];
+    function getUserPosts(
+        address _userAddress
+    ) public view onlyAllowedUser(_userAddress) returns (Post[] memory) {
+        uint[] memory userPostIds = userPosts[_userAddress];
+        Post[] memory userPostsTemp = new Post[](userPostIds.length);
+        for (uint i = 0; i < userPostIds.length; i++) {
+            userPostsTemp[i] = posts[userPostIds[i]];
         }
-    return userPostsTemp;
+        return userPostsTemp;
     }
 
+    //Get posts - using of pagination to prevent huge data query and expensive process
+    function getPostIds(
+        uint _page,
+        uint _perPage
+    ) public view onlyAllowedUser(msg.sender) returns (uint[] memory) {
+        uint start = (_page - 1) * _perPage;
+        uint end = start + _perPage;
+        if (end > postIds.length) {
+            end = postIds.length;
+        }
+        uint[] memory result = new uint[](end - start);
+        for(uint i = start ; i < end; i++) {
+            result[i-start] = postIds[i];
+        }
+        return result;
+    }
 }
