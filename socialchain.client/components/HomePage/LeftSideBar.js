@@ -84,10 +84,7 @@ export const LeftSideBar = () => {
               <EnvironmentOutlined />
               <span>Explore</span>
             </li>
-            <li className="flex items-center gap-x-5">
-              <FileTextOutlined />
-              <span>Files</span>
-            </li>
+
             <li className="flex items-center gap-x-5">
               <CalendarOutlined />
               <span>Events</span>
