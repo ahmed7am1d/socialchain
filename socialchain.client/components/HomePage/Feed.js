@@ -81,8 +81,11 @@ export const Feed = ({ isUserProfile }) => {
       uploadFileToIPFS,
       auth
     );
-    setUserPosts([...userPosts, newCreatedPostObjectResponse]);
-    //[8]- Reset the image and the input field
+    isUserProfile
+      ? setUserPosts([...userPosts, newCreatedPostObjectResponse])
+      : setFeedPosts([...feedPosts, newCreatedPostObjectResponse]);
+
+    // Reset the image and the input field
     deleteProfileImageHandler();
     createPostForm.resetFields();
   };
@@ -96,7 +99,7 @@ export const Feed = ({ isUserProfile }) => {
         const userPostsTemp = await getUserPosts();
         setUserPosts(userPostsTemp);
       } else {
-        const postIds = await getFeedPosts(1, 2);
+        const postIds = await getFeedPosts(1, 10);
         setFeedPosts(postIds);
       }
     }
@@ -310,11 +313,11 @@ export const Feed = ({ isUserProfile }) => {
                   <p>{post?.postDescription}</p>
                 </div>
                 {/* Image */}
-                {post?.imgHash && (
+                {post?.postImgHash && (
                   <div className="flex relative w-full h-[400px]">
                     <Image
                       layout="fill"
-                      src={`https://ipfs.io/ipfs/${post?.imgHash}`}
+                      src={`https://ipfs.io/ipfs/${post?.postImgHash}`}
                       alt="Post image"
                     />
                   </div>

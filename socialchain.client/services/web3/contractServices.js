@@ -27,7 +27,7 @@ export const getUserPosts = async () => {
     const timeDifferenceResult = await calculateTimeDifferenceString(date);
     const post = {
       author: tempObj.author,
-      imgHash: tempObj.imgHash,
+      postImgHash: tempObj.imgHash,
       likeCount: parseInt(tempObj.likeCount._hex, 16),
       postDescription: tempObj.postDescription,
       postId: parseInt(tempObj.postId._hex, 16),
@@ -92,7 +92,9 @@ export const createNewPost = async (
   const dateString = currentDate.toISOString();
   let newCreatedPostObjectResponse = {
     author: auth?.accountAddress,
-    imgHash: "",
+    userName:auth?.userName,
+    userProfileImgHash: auth?.imageHash,
+    postImgHash: "",
     likeCount: 0,
     postDescription: postDescription,
     postId: 0,
@@ -113,7 +115,7 @@ export const createNewPost = async (
       const ipfsProfilePictureHash = await uploadFileToIPFS(
         selectedProfilePictureFile
       );
-      newCreatedPostObjectResponse.imgHash = ipfsProfilePictureHash;
+      newCreatedPostObjectResponse.postImgHash = ipfsProfilePictureHash;
       newCreatePostObjectRequest.imageHash = ipfsProfilePictureHash;
     } catch (error) {
       console.error(error);
