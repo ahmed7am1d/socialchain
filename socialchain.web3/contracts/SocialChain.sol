@@ -256,4 +256,13 @@ contract SocialChain {
         }
         return result;
     }
+
+    function likePost(uint _postId) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
+        //[1]- The post should not be liked already by the specfic user (should return false)
+        require(!postLikers[_postId][msg.sender]);
+        //[2]- increase number of likes for the specfied post:
+        posts[_postId].likeCount = posts[_postId].likeCount + 1;
+        //[3]- set that the specified user liked the post
+        postLikers[_postId][msg.sender] = true;
+    }
 }
