@@ -135,6 +135,7 @@ event logRegisterUser(address userAddress, uint userId);
         uint timeStamp;
         uint likeCount;
         uint reportCount;
+        postStatus status;
     }
  ```
  #### 2- Post mapping/lists
@@ -145,10 +146,13 @@ event logRegisterUser(address userAddress, uint userId);
  ```
   ##### B- Mapping to retrieve all posts(postId) that is done by a user
  ```
-  mapping (uint => Post) private posts;
+     mapping(address => uint[]) private userPosts;
  ```
   ##### C- Mapping to track who like which post 
  > providing Id of post => retrieve all addresses(list) of users who liked the post
+ ```
+     mapping(uint => mapping(address => bool)) private postLikers;
+ ```
 #### 3- Post functions:
   ##### A- Function to create new post
  ><span style="color:red">Only active (registered user) is able to add new post</span>.
@@ -202,6 +206,7 @@ event logRegisterUser(address userAddress, uint userId);
  ```
   ##### D- Function to get all the social chain contract's postIds
   > Note: Only allowed users (registered + active) are able to call this function
+  > Note: This function implement the idea of pagination to prevent huge data query and expensive data [accepting number of items per page]
   ```
    function getPostIds(
         uint _page,
@@ -219,6 +224,20 @@ event logRegisterUser(address userAddress, uint userId);
         return result;
     }
   ```
+  ##### E- Function to like a post
+  > Note: Only allowed users (registered + active) are able to call this function
+  > Note: Only active posts should be liked in the contract
+  > Note: the post should not be liked already by the same user, 
+  ```
+  function likePost(uint _postId) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
+        //[1]- The post should not be liked already by the specfic user (should return false)
+        require(!postLikers[_postId][msg.sender]);
+        //[2]- increase number of likes for the specfied post:
+        posts[_postId].likeCount = posts[_postId].likeCount + 1;
+        //[3]- set that the specified user liked the post
+        postLikers[_postId][msg.sender] = true;
+    }
+  ``` 
 
 #### 4- Post events
  A- event to be emitted when a post is created
@@ -261,9 +280,8 @@ modifier onlyAllowedUser(address userAddress){
 
 #### 4- <span style="color:red">onlyActivePost </span>  modifier:
 - This modifier will make sure that the post is not (banned, deleted)
-- Will also through *not an active post* </Italic> if post does not exists
+- Will also through the error *"not an active post"* </Italic> if post does not exists
 ```
-
 modifier onlyActivePost(uint postId) {
         require(posts[postId].status == postStatus.Active, "Not an active post");
         _;
@@ -324,6 +342,8 @@ constructor() {
         registerUser("owner", "owner", "", "", "owner", 1, true);
     }
 ```
-
-
 <hr>
+#### Front-end notes:
+#### <span style="color:red">1- Modifiers error messages:</span>
+- The modifiers when they return error message, in the front-end:
+  - (socialchain.client) => (utils) => (extractContractErrorMessageUtils.js) , this utils will be responsible to retrieve the error message from the modifier
