@@ -34,29 +34,43 @@ import SocialChainContract from "../../contract-artifacts/contracts/SocialChain.
 import { euDateToISO8601, iSO8601ToUnixDate } from "@/utils/Date/dateUtils";
 import extractContractErrorMessage from "@/utils/Errors/extractContractErrorMessageUtils";
 import { LottieAnimation } from "@/components/Animations/LottieAnimation";
-import { Typewriter } from "react-simple-typewriter";
+
+/**
+ * Returns the initial props for a Next.js page, based on the context object.
+ * If the user has a valid access token cookie, redirects them to the home page (A logged in user can not access login page).
+ * Otherwise, returns an empty props object.
+ *
+ * @param {Object} context - The context object for the page.
+ * @param {Object} context.req - The HTTP request object.
+ * @returns {Object} An object containing either a redirect destination or an empty props object.
+ * @throws {Error} If an error occurs while parsing the cookies or.
+ */
 export async function getServerSideProps(context) {
-  //Catching the error if no cookies exists
   try {
     const cookies = cookie.parse(context.req.headers.cookie);
     const accessToken = cookies?.accessToken;
-
-    if (await isValidJWT(accessToken)) {
+    if (accessToken) {
+      if (await isValidJWT(accessToken)) {
+        return {
+          redirect: {
+            destination: "/home",
+            permanent: false,
+          },
+          props: {},
+        };
+      } else {
+        return {
+          props: {},
+        };
+      }
+    } else {
       return {
-        redirect: {
-          destination: "/home",
-          permanent: false,
-        },
         props: {},
       };
     }
-
-    return {
-      props: {}, // will be passed to the page component as props
-    };
   } catch (e) {
     return {
-      props: {}, // will be passed to the page component as props
+      props: {},
     };
   }
 }
@@ -152,7 +166,7 @@ const login = () => {
           //transactionResult.events[0].userAddress
           //transactionResult.events[0].userId
           //If the transaction is successful remember me should be stored:
-          localStorage.setItem("rememberMe", "true");
+          document.cookie = "rememberMe=true";
         } catch (error) {
           //Contract Error
           const errorMessage = extractContractErrorMessage(error.data.message);

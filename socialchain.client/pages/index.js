@@ -12,12 +12,6 @@ import { Typewriter } from "react-simple-typewriter";
 export default function IndexPage() {
   return (
     <>
-      <Head>
-        <title>Social chain</title>
-        <meta name="description" content="Social chain" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" href="/blockchain.ico" />
-      </Head>
       <div className="absolute w-screen h-[300px] bg-primaryGoldColorTrans top-60 -z-1 -skew-y-12 transform-gpu origin-top bottom-0"></div>
 
       <div
