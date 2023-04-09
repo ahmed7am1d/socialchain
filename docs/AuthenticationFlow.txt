@@ -1,7 +1,5 @@
 ---------------------------------------For the login process---------------------------------------: 
-
 (make sure to add a step where we make sure the user already registered(Either by ethereum in back-end by calling contract) (Either by calling the contract in the front-end))
-
 1- user connect his wallet 
 	- YES => 
 		1- retrive user account address
@@ -29,9 +27,7 @@
 			- No: retrive the message from the api and show it to user
 	- NO => Show user need to connect his wallet
 
-
 ---------------------------------------For the register process---------------------------------------: 
-
 1- user connect his wallet 
 2- retrive user account address 
 3- call the api end point /nonce with sending account address 
