@@ -9,11 +9,12 @@ import moodIcon from "../../assets/Icons/moode.png";
 import { Upload } from "phosphor-react";
 import blockChainEvent from "../../assets/Images/blockChainEvent.png";
 import {
-  HeartOutlined,
+  HeartFilled,
   CommentOutlined,
   ShareAltOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+import ConfettiExplosion from "react-confetti-explosion";
 import Image from "next/image";
 import { Form } from "antd";
 import { motion } from "framer-motion";
@@ -21,7 +22,10 @@ import {
   createNewPost,
   getFeedPosts,
   getUserPosts,
+  likePost,
+  unLikePost,
 } from "@/services/web3/contractServices";
+import homePageStyle from "../../pages/home/home.module.css";
 
 export const Feed = ({ isUserProfile }) => {
   //#region states and variables
@@ -36,6 +40,7 @@ export const Feed = ({ isUserProfile }) => {
     useState("");
   const [selectedProfilePictureSrcBytes, setSelectedProfilePictureSrcBytes] =
     useState("");
+  const [celebrateLikePost, setCelebrateLikePost] = useState({});
   //#endregion
 
   //#region handling
@@ -68,6 +73,79 @@ export const Feed = ({ isUserProfile }) => {
     imageRef.current.click();
   };
 
+  const handleLikePost = async (postId, postIsAlreadyLiked) => {
+    if (postIsAlreadyLiked) {
+      const postIsUnLiked = await unLikePost(postId);
+      if (postIsUnLiked) {
+        isUserProfile
+          ? setUserPosts((current) =>
+              current.map((obj) => {
+                if (obj.postId === postId) {
+                  return {
+                    ...obj,
+                    likeCount: obj?.likeCount - 1,
+                    isLikedByOwner: false,
+                  };
+                }
+                return obj;
+              })
+            )
+          : setFeedPosts((current) =>
+              current.map((obj) => {
+                if (obj.postId === postId) {
+                  return {
+                    ...obj,
+                    likeCount: obj?.likeCount - 1,
+                    isLikedByOwner: false,
+                  };
+                }
+                return obj;
+              })
+            );
+      }
+      //Remove the like
+      setCelebrateLikePost({
+        isPostLiked: false,
+        postId: postId,
+      });
+      return true;
+    }
+    //[1]- Call the contract service to like post
+    const postIsLikedResult = await likePost(postId);
+    //[2]- If function return true then increase in the current list post the like counter
+    if (postIsLikedResult) {
+      isUserProfile
+        ? setUserPosts((current) =>
+            current.map((obj) => {
+              if (obj.postId === postId) {
+                return {
+                  ...obj,
+                  likeCount: obj?.likeCount + 1,
+                  isLikedByOwner: true,
+                };
+              }
+              return obj;
+            })
+          )
+        : setFeedPosts((current) =>
+            current.map((obj) => {
+              if (obj.postId === postId) {
+                return {
+                  ...obj,
+                  likeCount: obj?.likeCount + 1,
+                  isLikedByOwner: true,
+                };
+              }
+              return obj;
+            })
+          );
+      //show animation
+      setCelebrateLikePost({
+        isPostLiked: true,
+        postId: postId,
+      });
+    }
+  };
   //#endregion
 
   //#region forms and validations
@@ -100,6 +178,7 @@ export const Feed = ({ isUserProfile }) => {
         setUserPosts(userPostsTemp);
       } else {
         const postIds = await getFeedPosts(1, 10);
+        console.log(postIds);
         setFeedPosts(postIds);
       }
     }
@@ -314,9 +393,10 @@ export const Feed = ({ isUserProfile }) => {
                 </div>
                 {/* Image */}
                 {post?.postImgHash && (
-                  <div className="flex relative w-full h-[400px]">
+                  <div className="flex relative w-full h-[300px]">
                     <Image
                       layout="fill"
+                      objectFit="contain"
                       src={`https://ipfs.io/ipfs/${post?.postImgHash}`}
                       alt="Post image"
                     />
@@ -324,9 +404,28 @@ export const Feed = ({ isUserProfile }) => {
                 )}
 
                 {/* Likes - comments - share */}
-                <div className="flex gap-x-6 text-white">
-                  <div className="flex items-center justify-center gap-x-2">
-                    <HeartOutlined />
+                <div className=" relative flex gap-x-6 text-white">
+                  {celebrateLikePost?.isPostLiked &&
+                    celebrateLikePost?.postId === post?.postId && (
+                      <ConfettiExplosion
+                        duration={4000}
+                        particleCount={50}
+                        className=" absolute"
+                        force={0.8}
+                      />
+                    )}
+
+                  <div
+                    className={`flex items-center justify-center gap-x-2 ${
+                      post?.isLikedByOwner
+                        ? homePageStyle.postIsLiked
+                        : homePageStyle.likeButtonContainer
+                    } `}
+                    onClick={() =>
+                      handleLikePost(post?.postId, post?.isLikedByOwner)
+                    }
+                  >
+                    <HeartFilled />
                     <span>{post?.likeCount}</span>
                   </div>
                   <div className="flex items-center justify-center gap-x-2">
@@ -375,9 +474,10 @@ export const Feed = ({ isUserProfile }) => {
 
                 {/* Image */}
                 {post?.postImgHash && (
-                  <div className="flex relative w-full h-[400px]">
+                  <div className="flex relative w-full h-[300px]">
                     <Image
                       layout="fill"
+                      objectFit="contain"
                       src={`https://ipfs.io/ipfs/${post?.postImgHash}`}
                       alt="Post image"
                     />
@@ -385,9 +485,28 @@ export const Feed = ({ isUserProfile }) => {
                 )}
 
                 {/* Likes - comments - share */}
-                <div className="flex gap-x-6 text-white">
-                  <div className="flex items-center justify-center gap-x-2">
-                    <HeartOutlined className="hover:text-red-600" />
+                <div className=" relative flex gap-x-6 text-white">
+                  {celebrateLikePost?.isPostLiked &&
+                    celebrateLikePost?.postId === post?.postId && (
+                      <ConfettiExplosion
+                        duration={4000}
+                        particleCount={50}
+                        className=" absolute"
+                        force={0.8}
+                      />
+                    )}
+
+                  <div
+                    className={`flex items-center justify-center gap-x-2 ${
+                      post?.isLikedByOwner
+                        ? homePageStyle.postIsLiked
+                        : homePageStyle.likeButtonContainer
+                    } `}
+                    onClick={() =>
+                      handleLikePost(post?.postId, post?.isLikedByOwner)
+                    }
+                  >
+                    <HeartFilled />
                     <span>{post?.likeCount}</span>
                   </div>
                   <div className="flex items-center justify-center gap-x-2">

@@ -265,4 +265,17 @@ contract SocialChain {
         //[3]- set that the specified user liked the post
         postLikers[_postId][msg.sender] = true;
     }
+
+    function unLikePost(uint _postId) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
+        //[1]- Post should be like already by the speicifc user 
+        require(postLikers[_postId][msg.sender]);
+        //[2]- decrase number of likes for the specfied post:
+        posts[_postId].likeCount = posts[_postId].likeCount-  1;
+        //[3]- set that the specified user liked the post
+        postLikers[_postId][msg.sender] = false;
+    }
+
+    function isLikedByAddress(uint _postId, address _userAddress) public onlyActivePost(_postId) onlyAllowedUser(_userAddress) view returns (bool) {
+        return postLikers[_postId][_userAddress];
+    }
 }

@@ -96,7 +96,7 @@
         totalUsers = totalUsers + 1;
         //[3]- set id of new user to the counter
         uint id = totalUsers;
-        //[4]- add User object to our mapping of (address => user) for the specific registerd user
+        //[4]- add User object to our mapping of (address => user) for the specific registered user
         users[msg.sender] = User(
             id,
             msg.sender,
@@ -227,7 +227,7 @@ event logRegisterUser(address userAddress, uint userId);
   ##### E- Function to like a post
   > Note: Only allowed users (registered + active) are able to call this function
   > Note: Only active posts should be liked in the contract
-  > Note: the post should not be liked already by the same user, 
+  > Note: the post should not be liked already by the same user
   ```
   function likePost(uint _postId) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
         //[1]- The post should not be liked already by the specfic user (should return false)
@@ -236,6 +236,32 @@ event logRegisterUser(address userAddress, uint userId);
         posts[_postId].likeCount = posts[_postId].likeCount + 1;
         //[3]- set that the specified user liked the post
         postLikers[_postId][msg.sender] = true;
+    }
+  ```
+
+  ##### F- Function to unlike a post
+  > Note: Only allowed users (registered + active) are able to call this function
+  > Note: Only active posts should be liked in the contract
+  > Note: the post should  be liked already by the same user 
+  ```
+  function unLikePost(uint _postId) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
+        //[1]- Post should be like already by the speicifc user 
+        require(postLikers[_postId][msg.sender]);
+        //[2]- decrase number of likes for the specfied post:
+        posts[_postId].likeCount = posts[_postId].likeCount-  1;
+        //[3]- set that the specified user liked the post
+        postLikers[_postId][msg.sender] = false;
+    }
+  ``` 
+
+  ##### G- Function to check if a post is liked by an address
+  > Note: Only allowed users (registered + active) are able to call this function
+  > Note: Only active posts should be checked
+
+  ```
+ function isLikedByAddress(uint _postId, address _userAddress) 
+ public onlyActivePost(_postId) onlyAllowedUser(_userAddress) view returns (bool) {
+        return postLikers[_postId][_userAddress];
     }
   ``` 
 

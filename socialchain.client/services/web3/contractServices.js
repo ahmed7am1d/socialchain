@@ -33,6 +33,10 @@ export const getUserPosts = async () => {
       postId: parseInt(tempObj.postId._hex, 16),
       reportCount: parseInt(tempObj.reportCount._hex, 16),
       timeStamp: timeDifferenceResult,
+      isLikedByOwner: await contract.isLikedByAddress(
+        parseInt(tempObj.postId._hex, 16),
+        accountAddresses[0]
+      ),
     };
     //[3]- return the filtered post to the mapping
     return post;
@@ -47,6 +51,7 @@ export const getFeedPosts = async (page, perPage) => {
     socialChainContractABI.abi,
     provider
   );
+  const accountAddresses = await provider.send("eth_requestAccounts", []);
   const result = await contract.getPostIds(page, perPage);
   //[1]- Get all postIds
   const postIdsTemp = result.map((postId) => {
@@ -74,6 +79,10 @@ export const getFeedPosts = async (page, perPage) => {
       status: result?.status,
       timeStamp: timeDifferenceResult,
       userName: userObject?.userName,
+      isLikedByOwner: await contract.isLikedByAddress(
+        parseInt(result.postId._hex, 16),
+        accountAddresses[0]
+      ),
     };
     return postObject;
   });
@@ -92,7 +101,7 @@ export const createNewPost = async (
   const dateString = currentDate.toISOString();
   let newCreatedPostObjectResponse = {
     author: auth?.accountAddress,
-    userName:auth?.userName,
+    userName: auth?.userName,
     userProfileImgHash: auth?.imageHash,
     postImgHash: "",
     likeCount: 0,
@@ -151,4 +160,60 @@ export const createNewPost = async (
     16
   );
   return newCreatedPostObjectResponse;
+};
+
+/**
+ * This function likes a post on the SocialChainContract using Ethereum blockchain technology.
+ * @param postId - The ID of the post that the user wants to like.
+ * @returns a boolean value. If the transaction is successful [post is liked] and the status is 1, it returns true.
+ * Otherwise, it returns false. If there is an error, it also returns false and logs the error to the
+ * console.
+ */
+export const likePost = async (postId) => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(
+    SocialChainContractConstants.SOCIAL_CHAIN_CONTRACT_ADDRESS,
+    socialChainContractABI.abi,
+    signer
+  );
+  try {
+    const transaction = await contract.likePost(postId);
+    const transactionResult = await transaction.wait();
+    if (transactionResult?.status === 1) {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
+/**
+ * This function allows a user to unlike a post on the SocialChain platform using the Ethereum
+ * blockchain.
+ * @param postId - The ID of the post that the user wants to unlike.
+ * @returns a boolean value. If the transaction is successful (post is unliked) and the status is 1, it returns true.
+ * Otherwise, it returns false.
+ */
+export const unLikePost = async (postId) => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(
+    SocialChainContractConstants.SOCIAL_CHAIN_CONTRACT_ADDRESS,
+    socialChainContractABI.abi,
+    signer
+  );
+  try {
+    const transaction = await contract.unLikePost(postId);
+    const transactionResult = await transaction.wait();
+    if (transactionResult?.status === 1) {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
 };
