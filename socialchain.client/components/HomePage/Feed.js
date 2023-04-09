@@ -23,6 +23,7 @@ import {
   getFeedPosts,
   getUserPosts,
   likePost,
+  unLikePost,
 } from "@/services/web3/contractServices";
 import homePageStyle from "../../pages/home/home.module.css";
 
@@ -74,8 +75,39 @@ export const Feed = ({ isUserProfile }) => {
 
   const handleLikePost = async (postId, postIsAlreadyLiked) => {
     if (postIsAlreadyLiked) {
+      const postIsUnLiked = await unLikePost(postId);
+      if (postIsUnLiked) {
+        isUserProfile
+          ? setUserPosts((current) =>
+              current.map((obj) => {
+                if (obj.postId === postId) {
+                  return {
+                    ...obj,
+                    likeCount: obj?.likeCount - 1,
+                    isLikedByOwner: false,
+                  };
+                }
+                return obj;
+              })
+            )
+          : setFeedPosts((current) =>
+              current.map((obj) => {
+                if (obj.postId === postId) {
+                  return {
+                    ...obj,
+                    likeCount: obj?.likeCount - 1,
+                    isLikedByOwner: false,
+                  };
+                }
+                return obj;
+              })
+            );
+      }
       //Remove the like
-      console.log("Request to remove like");
+      setCelebrateLikePost({
+        isPostLiked: false,
+        postId: postId,
+      });
       return true;
     }
     //[1]- Call the contract service to like post
@@ -86,7 +118,11 @@ export const Feed = ({ isUserProfile }) => {
         ? setUserPosts((current) =>
             current.map((obj) => {
               if (obj.postId === postId) {
-                return { ...obj, likeCount: obj?.likeCount + 1 , isLikedByOwner: true};
+                return {
+                  ...obj,
+                  likeCount: obj?.likeCount + 1,
+                  isLikedByOwner: true,
+                };
               }
               return obj;
             })
@@ -94,7 +130,11 @@ export const Feed = ({ isUserProfile }) => {
         : setFeedPosts((current) =>
             current.map((obj) => {
               if (obj.postId === postId) {
-                return { ...obj, likeCount: obj?.likeCount + 1, isLikedByOwner: true };
+                return {
+                  ...obj,
+                  likeCount: obj?.likeCount + 1,
+                  isLikedByOwner: true,
+                };
               }
               return obj;
             })
@@ -353,7 +393,7 @@ export const Feed = ({ isUserProfile }) => {
                 </div>
                 {/* Image */}
                 {post?.postImgHash && (
-                  <div className="flex relative w-full h-[500px]">
+                  <div className="flex relative w-full h-[300px]">
                     <Image
                       layout="fill"
                       objectFit="contain"
@@ -364,7 +404,7 @@ export const Feed = ({ isUserProfile }) => {
                 )}
 
                 {/* Likes - comments - share */}
-                <div className="flex gap-x-6 text-white">
+                <div className=" relative flex gap-x-6 text-white">
                   {celebrateLikePost?.isPostLiked &&
                     celebrateLikePost?.postId === post?.postId && (
                       <ConfettiExplosion
@@ -374,10 +414,16 @@ export const Feed = ({ isUserProfile }) => {
                         force={0.8}
                       />
                     )}
+
                   <div
                     className={`flex items-center justify-center gap-x-2 ${
-                      post?.isLikedByOwner && homePageStyle.postIsLiked
-                    } ${homePageStyle.likeButtonContainer}`}
+                      post?.isLikedByOwner
+                        ? homePageStyle.postIsLiked
+                        : homePageStyle.likeButtonContainer
+                    } `}
+                    onClick={() =>
+                      handleLikePost(post?.postId, post?.isLikedByOwner)
+                    }
                   >
                     <HeartFilled />
                     <span>{post?.likeCount}</span>
@@ -428,7 +474,7 @@ export const Feed = ({ isUserProfile }) => {
 
                 {/* Image */}
                 {post?.postImgHash && (
-                  <div className="flex relative w-full h-[500px]">
+                  <div className="flex relative w-full h-[300px]">
                     <Image
                       layout="fill"
                       objectFit="contain"
