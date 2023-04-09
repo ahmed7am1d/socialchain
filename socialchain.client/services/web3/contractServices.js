@@ -33,6 +33,7 @@ export const getUserPosts = async () => {
       postId: parseInt(tempObj.postId._hex, 16),
       reportCount: parseInt(tempObj.reportCount._hex, 16),
       timeStamp: timeDifferenceResult,
+      isLikedByOwner: await contract.isLikedByAddress(parseInt(tempObj.postId._hex, 16),accountAddresses[0]),
     };
     //[3]- return the filtered post to the mapping
     return post;
@@ -47,6 +48,7 @@ export const getFeedPosts = async (page, perPage) => {
     socialChainContractABI.abi,
     provider
   );
+  const accountAddresses = await provider.send("eth_requestAccounts", []);
   const result = await contract.getPostIds(page, perPage);
   //[1]- Get all postIds
   const postIdsTemp = result.map((postId) => {
@@ -74,6 +76,7 @@ export const getFeedPosts = async (page, perPage) => {
       status: result?.status,
       timeStamp: timeDifferenceResult,
       userName: userObject?.userName,
+      isLikedByOwner: await contract.isLikedByAddress(parseInt(result.postId._hex, 16),accountAddresses[0]),
     };
     return postObject;
   });
@@ -152,3 +155,24 @@ export const createNewPost = async (
   );
   return newCreatedPostObjectResponse;
 };
+
+export const likePost = async (postId) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(
+      SocialChainContractConstants.SOCIAL_CHAIN_CONTRACT_ADDRESS,
+      socialChainContractABI.abi,
+      signer
+    );
+    try {
+      const transaction = await contract.likePost(postId);
+      const transactionResult = await transaction.wait();
+      if (transactionResult?.status === 1) {
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+
+}

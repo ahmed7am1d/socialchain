@@ -265,4 +265,8 @@ contract SocialChain {
         //[3]- set that the specified user liked the post
         postLikers[_postId][msg.sender] = true;
     }
+
+    function isLikedByAddress(uint _postId, address _userAddress) public view returns (bool) {
+        return postLikers[_postId][_userAddress];
+    }
 }
