@@ -239,6 +239,17 @@ event logRegisterUser(address userAddress, uint userId);
     }
   ``` 
 
+  ##### F- Function to check if a post is liked by an address
+  > Note: Only allowed users (registered + active) are able to call this function
+  > Note: Only active posts should be checked
+
+  ```
+ function isLikedByAddress(uint _postId, address _userAddress) 
+ public onlyActivePost(_postId) onlyAllowedUser(_userAddress) view returns (bool) {
+        return postLikers[_postId][_userAddress];
+    }
+  ``` 
+
 #### 4- Post events
  A- event to be emitted when a post is created
 ```

@@ -266,7 +266,7 @@ contract SocialChain {
         postLikers[_postId][msg.sender] = true;
     }
 
-    function isLikedByAddress(uint _postId, address _userAddress) public view returns (bool) {
+    function isLikedByAddress(uint _postId, address _userAddress) public onlyActivePost(_postId) onlyAllowedUser(_userAddress) view returns (bool) {
         return postLikers[_postId][_userAddress];
     }
 }
