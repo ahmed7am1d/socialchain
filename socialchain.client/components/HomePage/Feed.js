@@ -13,6 +13,7 @@ import {
   CommentOutlined,
   ShareAltOutlined,
   DeleteOutlined,
+  SendOutlined,
 } from "@ant-design/icons";
 import ConfettiExplosion from "react-confetti-explosion";
 import Image from "next/image";
@@ -404,7 +405,7 @@ export const Feed = ({ isUserProfile }) => {
                 )}
 
                 {/* Likes - comments - share */}
-                <div className=" relative flex gap-x-6 text-white">
+                <div className=" px-2 relative flex gap-x-6 text-white">
                   {celebrateLikePost?.isPostLiked &&
                     celebrateLikePost?.postId === post?.postId && (
                       <ConfettiExplosion
@@ -436,6 +437,122 @@ export const Feed = ({ isUserProfile }) => {
                     <ShareAltOutlined />
                     <span>0</span>
                   </div>
+                </div>
+                {/* Comment input field */}
+                <div className="relative">
+                  <input
+                    placeholder="Write a comment..."
+                    className="
+                  w-full px-2 py-3 rounded-md 
+                  bg-darkBlue text-white
+                  focus:outline-none
+                  "
+                  />
+                  <SendOutlined className="text-white absolute top-[15px] right-3" />
+                </div>
+                {/*comments */}
+                <div className=" relative">
+                  <div
+                    className="scrollbar-thin scrollbar-thumb-primaryGoldColor scrollbar-track-darkBlue scrollbar-rounded-lg
+                  max-h-[200px] flex flex-col gap-y-3 min-h-[100px] overflow-y-scroll"
+                  >
+                    {/* First comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">
+                          This game is my favourit game all the time it is so
+                          realistic
+                        </p>
+                      </div>
+                    </div>
+                    {/* Second comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">I don't like it</p>
+                      </div>
+                    </div>
+                    {/* Third comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">I don't like it</p>
+                      </div>
+                    </div>
+                    {/* Fourth comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">I don't like it</p>
+                      </div>
+                    </div>
+                    {/* Fifth comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">I don't like it</p>
+                      </div>
+                    </div>
+                    {/* Sixth comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">I don't like it</p>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-white mt-6 hover:underline hover:cursor-pointer">
+                    Show more comments
+                  </p>
                 </div>
               </div>
             ))
@@ -485,7 +602,7 @@ export const Feed = ({ isUserProfile }) => {
                 )}
 
                 {/* Likes - comments - share */}
-                <div className=" relative flex gap-x-6 text-white">
+                <div className=" px-2 relative flex gap-x-6 text-white">
                   {celebrateLikePost?.isPostLiked &&
                     celebrateLikePost?.postId === post?.postId && (
                       <ConfettiExplosion
@@ -517,6 +634,122 @@ export const Feed = ({ isUserProfile }) => {
                     <ShareAltOutlined />
                     <span>0</span>
                   </div>
+                </div>
+                {/* Comment input field */}
+                <div className="relative">
+                  <input
+                    placeholder="Write a comment..."
+                    className="
+                  w-full px-2 py-3 rounded-md 
+                  bg-darkBlue text-white
+                  focus:outline-none
+                  "
+                  />
+                  <SendOutlined className="text-white absolute top-[15px] right-3" />
+                </div>
+                {/*comments */}
+                <div className=" relative">
+                  <div
+                    className="scrollbar-thin scrollbar-thumb-primaryGoldColor scrollbar-track-darkBlue scrollbar-rounded-lg
+                  max-h-[200px] flex flex-col gap-y-3 min-h-[100px] overflow-y-scroll"
+                  >
+                    {/* First comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">
+                          This game is my favourit game all the time it is so
+                          realistic
+                        </p>
+                      </div>
+                    </div>
+                    {/* Second comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">I don't like it</p>
+                      </div>
+                    </div>
+                    {/* Third comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">I don't like it</p>
+                      </div>
+                    </div>
+                    {/* Fourth comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">I don't like it</p>
+                      </div>
+                    </div>
+                    {/* Fifth comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">I don't like it</p>
+                      </div>
+                    </div>
+                    {/* Sixth comment */}
+                    <div className="flex gap-x-2 items-center">
+                      <div>
+                        <Image
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          className="rounded-full"
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                        <p className="text-md">ahmed7am1d</p>
+                        <p className="text-sm">I don't like it</p>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-white mt-6 hover:underline hover:cursor-pointer">
+                    Show more comments
+                  </p>
                 </div>
               </div>
             ))}
