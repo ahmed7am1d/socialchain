@@ -42,6 +42,7 @@ export const Feed = ({ isUserProfile }) => {
   const [selectedProfilePictureSrcBytes, setSelectedProfilePictureSrcBytes] =
     useState("");
   const [celebrateLikePost, setCelebrateLikePost] = useState({});
+  const [commentInputFieldValue, setCommentInputFieldValue] = useState("");
   //#endregion
 
   //#region handling
@@ -146,6 +147,12 @@ export const Feed = ({ isUserProfile }) => {
         postId: postId,
       });
     }
+  };
+
+  const submitCommentHandler = async (postId) => {
+    console.log("The post Id =>", postId);
+    console.log("The comment to be sended => ", commentInputFieldValue);
+    console.log("The commenter address => ", auth?.accountAddress);
   };
   //#endregion
 
@@ -327,7 +334,7 @@ export const Feed = ({ isUserProfile }) => {
                   width={22}
                   alt="People icon"
                 />
-                <p>Tag Friend</p>
+                <p className="hidden sm:block md:block lg:block">Tag Friend</p>
               </div>
               <div className="flex gap-x-2">
                 <Image
@@ -336,11 +343,13 @@ export const Feed = ({ isUserProfile }) => {
                   width={22}
                   alt="Location icon"
                 />
-                <p>Share Location</p>
+                <p className="hidden sm:block md:block lg:block">
+                  Share Location
+                </p>
               </div>
               <div className="flex gap-x-2">
                 <Image src={moodIcon} height={20} width={22} alt="Mood icon" />
-                <p>Mood</p>
+                <p className="hidden sm:block md:block lg:block">Mood</p>
               </div>
             </div>
             <div>
@@ -447,8 +456,13 @@ export const Feed = ({ isUserProfile }) => {
                   bg-darkBlue text-white
                   focus:outline-none
                   "
+                    value={commentInputFieldValue}
+                    onChange={(e) => setCommentInputFieldValue(e.target.value)}
                   />
-                  <SendOutlined className="text-white absolute top-[15px] right-3" />
+                  <SendOutlined
+                    className="text-white absolute top-[15px] right-3"
+                    onClick={() => submitCommentHandler(post?.postId)}
+                  />
                 </div>
                 {/*comments */}
                 <div className=" relative">
@@ -644,8 +658,13 @@ export const Feed = ({ isUserProfile }) => {
                   bg-darkBlue text-white
                   focus:outline-none
                   "
+                    value={commentInputFieldValue}
+                    onChange={(e) => setCommentInputFieldValue(e.target.value)}
                   />
-                  <SendOutlined className="text-white absolute top-[15px] right-3" />
+                  <SendOutlined
+                    className="text-white absolute top-[15px] right-3"
+                    onClick={() => submitCommentHandler(post?.postId)}
+                  />
                 </div>
                 {/*comments */}
                 <div className=" relative">
