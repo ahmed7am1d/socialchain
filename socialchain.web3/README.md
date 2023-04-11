@@ -307,20 +307,32 @@ struct Comment {
 
  ><span style="color:red">Only active post can have a comment</span>.
  ```
-     function createComment(
+    function createComment(
         uint _postId,
         string memory _comment
     ) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
         //[1]- make sure comment is not empty
         bytes memory tempStringValidation = bytes(_comment);
         require(tempStringValidation.length != 0, "Comment can not be empty !");
-        //[2]- Id incremental 
+        //[2]- Id incremental
         totalComments = totalComments + 1;
         uint commentId = totalComments;
-        //[3]- Adding the post to the mapping 
-        comments[commentId] = Comment(commentId,msg.sender,_postId,_comment,0,0,block.timestamp,commentStatus.Active);
+        //[3]- Adding the post to the mapping
+        comments[commentId] = Comment(
+            commentId,
+            msg.sender,
+            _postId,
+            _comment,
+            0,
+            0,
+            block.timestamp,
+            commentStatus.Active
+        );
         //[4]- Adding the comment to the post mapping (Each post can have many comments)
         postComments[_postId].push(commentId);
+        //[5]- Log the created comment 
+        //    event logCommentCreated(address _author,uint _commentId,uint _postId, uint _likeCount, uint _reportCount, uint _timeStamp, string _content);
+        emit logCommentCreated(msg.sender,commentId,_postId,0,0,block.timestamp,_comment);
     }
  ```
  ##### B- Function to retrieve comment by comment Id:
@@ -520,6 +532,21 @@ constructor() {
         owner = payable(msg.sender);
         registerUser("owner", "owner", "", "", "owner", 1, true);
     }
+```
+<hr>
+### Contract Events:
+Contract events are mostly used like the behavior in the api when returning a response to the client (front-end) but also to notify the execution on the netowkr
+#### 1- <span style="color:red">logRegisterUser</span>  event
+```
+    event logRegisterUser(address userAddress, uint userId);
+```
+#### 2- <span style="color:red">logPostCreated</span>  event
+```
+    event logPostCreated(address _author, uint _userId, uint _postId);
+```
+#### 3- <span style="color:red">logCommentCreated</span>  event
+```
+    event logCommentCreated(address _author,uint _commentId,uint _postId, uint _likeCount, uint _reportCount, uint _timeStamp, string _content);
 ```
 <hr>
 #### Front-end notes:
