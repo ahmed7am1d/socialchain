@@ -270,6 +270,128 @@ event logRegisterUser(address userAddress, uint userId);
 ```
 event logPostCreated(address _author, uint _userId, uint _postId);
 ```
+<hr>
+## Everything about Comments:
+
+ #### 1- Comment struct:
+ ```
+struct Comment {
+        uint commentId;
+        address author;
+        uint postId;
+        string content;
+        uint likeCount;
+        uint reportCount;
+        uint timeStamp;
+        commentStatus status;
+    }
+ ```
+ #### 2- Comment mapping/lists
+ 
+  ##### A- Mapping to get/store a comment by commentId
+ ```
+ mapping(uint=>Comment) private comments;
+ ```
+  ##### B- Mapping to retrieve all comments(commentIds) that is done by a user
+ ```
+    mapping (address => uint[]) userComments;
+ ```
+  ##### C- Mapping to get all comments for specific post
+ > providing Id of post => retrieve list of comments ids
+ ```
+     mapping (uint => uint[]) private postComments;
+ ```
+#### 3- Comment functions:
+  ##### A- Function to create new comment:
+ ><span style="color:red">Only active (registered user) is able to add new comment</span>.
+
+ ><span style="color:red">Only active post can have a comment</span>.
+ ```
+     function createComment(
+        uint _postId,
+        string memory _comment
+    ) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
+        //[1]- make sure comment is not empty
+        bytes memory tempStringValidation = bytes(_comment);
+        require(tempStringValidation.length != 0, "Comment can not be empty !");
+        //[2]- Id incremental 
+        totalComments = totalComments + 1;
+        uint commentId = totalComments;
+        //[3]- Adding the post to the mapping 
+        comments[commentId] = Comment(commentId,msg.sender,_postId,_comment,0,0,block.timestamp,commentStatus.Active);
+        //[4]- Adding the comment to the post mapping (Each post can have many comments)
+        postComments[_postId].push(commentId);
+    }
+ ```
+ ##### B- Function to retrieve comment by comment Id:
+  ><span style="color:red">Only active (registered user) is able to get a comment</span>.
+
+  ><span style="color:red">Only active comment can be retrieved</span>.
+ ```
+     function getCommentById(
+        uint _commentId
+    )
+        public
+        view
+        onlyAllowedUser(msg.sender)
+        onlyActiveComment(_commentId)
+        returns (Comment memory)
+    {
+        return comments[_commentId];
+    }
+ ```
+
+  ##### C- Function to retrieve comments for specific post using pagination:
+  ><span style="color:red">Only active (registered user) is able to get a comment</span>.
+
+  ><span style="color:red">Only retrieve comments for active posts</span>.
+  
+  >Explanation of pagination:
+  > - Request list 1 with 2 comments 
+  >     - startIndex = (1-1) * 2 = 0 
+  >     - endIndex = 0 (startIndex) + 2 (_commentsPerList) = 2 
+  > - startIndex = 0
+  > - endIndex  = 2
+
+  >Explanation of <span style="color:red">commentsResponse[i - startIndex]</span>
+  > - The reason we subtract startIndex from i is because commentsResponse is a dynamic array with a fixed length that starts from index 0. and we want to fill from index 0 
+  > - In the loop, i starts from startIndex, but we want to assign the comments to commentsResponse starting from index 0.
+  > - So, for example, if startIndex is 3 and endIndex is 6, we want to assign the comments to commentsResponse as follows:
+ commentsResponse[3(i) - 3(startIndex) <span style="color:blue; font-weight:bold"> = 0 </span>] = comments[postComments[_postId][3]];
+commentsResponse[4(i) - 3(startIndex) <span style="color:blue; font-weight:bold"> = 1 </span>] = comments[postComments[_postId][4]];
+commentsResponse[4(i) - 3(startIndex) <span style="color:blue; font-weight:bold"> = 2 </span>] = comments[postComments[_postId][5]];
+
+
+ ```
+    function getPostComments(
+        uint _listNumber,
+        uint _commentPerList,
+        uint _postId
+    )
+        public
+        view
+        onlyAllowedUser(msg.sender)
+        onlyActivePost(_postId)
+        returns (Comment[] memory)
+    {
+        uint startIndex = (_listNumber - 1) * _commentPerList;
+        uint endIndex = startIndex + _commentPerList;
+        //to avoid IndexOutOfRangeException
+        if (endIndex > postComments[_postId].length) {
+            endIndex = postComments[_postId].length;
+        }
+        Comment[] memory commentsResponse = new Comment[](
+            endIndex - startIndex
+        );
+        uint tempCommentId = 0;
+        for (uint i = startIndex; i < endIndex; i++) {
+            tempCommentId = postComments[_postId][i];
+            commentsResponse[i - startIndex] = comments[tempCommentId];
+        }
+        return commentsResponse;
+    }
+ ```
+
 <hr/>
 ### Contract Modifiers and limitations:
 #### 1- <span style="color:red">checkUserNotRegisteredByAddress</span>  modifier
@@ -313,6 +435,19 @@ modifier onlyActivePost(uint postId) {
         _;
     }
 ```
+#### 5- <span style="color:red">onlyActiveComment </span>  modifier:
+- This modifier will make sure that the comment is not (banned, deleted) (from the status)
+- Will also through the error *"not an active comment"* </Italic> if comment does not exists
+```
+    modifier onlyActiveComment(uint commentId) {
+        require(
+            comments[commentId].status == commentStatus.Active,
+            "Not an active comment"
+        );
+        _;
+    }
+```
+
 <hr>
 ### Contract Enums: 
 ##### 1- <span style="color:green; font-weight:bold">accountStatus</span> enum: 
@@ -336,7 +471,20 @@ modifier onlyActivePost(uint postId) {
         Deactived
     }
 ```
+
+##### 3- <span style="color:green; font-weight:bold">commentStatus</span> enum: 
+- NP, stand for not present
+```
+  enum commentStatus {
+        NP,
+        Active,
+        Banned,
+        Deleted
+    }
+```
+
 <hr>
+
 
 ### Contract constructor and variables:
 
@@ -354,6 +502,11 @@ modifier onlyActivePost(uint postId) {
 ```
     uint public totalPosts = 0;
 ```
+- This state is used as number of total comments, <span style="color:red; font-weight:bold">but also as Id auto incremental generator for the comments</span>
+```
+    uint public totalComments = 0;
+```
+
 - This state is used to store all the postsIds in the contract
 ```
     uint[] private postIds;
