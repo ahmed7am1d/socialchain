@@ -270,7 +270,6 @@ const login = () => {
         accountAddresses[0]
       );
       if (isRegisteredUserResult === true) {
-        console.log("Registered User");
         //[A]- nonce
         const messageTempToken = await nonce(accountAddresses[0]);
         //[B]- get user signature

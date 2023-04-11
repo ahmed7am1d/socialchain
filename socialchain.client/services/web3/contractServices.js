@@ -25,6 +25,18 @@ export const getUserPosts = async () => {
     const unixDate = parseInt(tempObj.timeStamp._hex, 16);
     const date = await UnixDateToiSO860StringDate(unixDate);
     const timeDifferenceResult = await calculateTimeDifferenceString(date);
+    let postComments = await contract.getPostComments(
+      1,
+      3,
+      parseInt(tempObj.postId._hex, 16)
+    );
+    let filteredComments = postComments?.map(async (comment) => {
+      let commentAuthorAddress = comment?.author;
+      return {
+        ...comment,
+        author: Object.assign({}, await contract.getUser(commentAuthorAddress)),
+      };
+    });
     const post = {
       author: tempObj.author,
       postImgHash: tempObj.imgHash,
@@ -37,6 +49,8 @@ export const getUserPosts = async () => {
         parseInt(tempObj.postId._hex, 16),
         accountAddresses[0]
       ),
+
+      comments: await Promise.all(filteredComments),
     };
     //[3]- return the filtered post to the mapping
     return post;
@@ -68,6 +82,25 @@ export const getFeedPosts = async (page, perPage) => {
     const userObject = await contract.getUser(result.author);
     const userProfileImageHash = userObject?.imageHash;
     //Return a post object with all necessary  details
+    let postComments = await contract.getPostComments(
+      1,
+      5,
+      parseInt(result.postId._hex, 16)
+    );
+    let filteredComments = postComments?.map(async (comment) => {
+      let commentAuthorAddress = comment?.author;
+      const unixDate = parseInt(comment.timeStamp._hex, 16);
+      const date = await UnixDateToiSO860StringDate(unixDate);
+      const timeDifferenceResult = await calculateTimeDifferenceString(date);
+      return {
+        author: Object.assign({}, await contract.getUser(commentAuthorAddress)),
+        timeStamp: timeDifferenceResult,
+        commentId: parseInt(comment?.commentId._hex, 16),
+        likeCount: parseInt(comment?.likeCount._hex, 16),
+        reportCount: parseInt(comment?.reportCount._hex, 16),
+        content: comment?.content,
+      };
+    });
     const postObject = {
       author: result?.author,
       postImgHash: result?.imgHash,
@@ -83,6 +116,8 @@ export const getFeedPosts = async (page, perPage) => {
         parseInt(result.postId._hex, 16),
         accountAddresses[0]
       ),
+
+      comments: await Promise.all(filteredComments),
     };
     return postObject;
   });
@@ -210,6 +245,42 @@ export const unLikePost = async (postId) => {
     const transactionResult = await transaction.wait();
     if (transactionResult?.status === 1) {
       return true;
+    }
+    return false;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
+export const createComment = async (postId, comment) => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(
+    SocialChainContractConstants.SOCIAL_CHAIN_CONTRACT_ADDRESS,
+    socialChainContractABI.abi,
+    signer
+  );
+  try {
+    const transaction = await contract.createComment(postId, comment);
+    const transactionResult = await transaction.wait();
+    if (transactionResult?.status === 1) {
+      //events - args
+      //[1]- extract the emitted event arguemnt with filtered data
+      const comment = Object.assign({}, transactionResult?.events[0].args);
+      let commentAuthorAddress = comment?._author;
+      const unixDate = parseInt(comment._timeStamp._hex, 16);
+      const date = await UnixDateToiSO860StringDate(unixDate);
+      const timeDifferenceResult = await calculateTimeDifferenceString(date);
+      const filteredCommentResponse = {
+        author: Object.assign({}, await contract.getUser(commentAuthorAddress)),
+        timeStamp: timeDifferenceResult,
+        commentId: parseInt(comment?._commentId._hex, 16),
+        likeCount: parseInt(comment?._likeCount._hex, 16),
+        reportCount: parseInt(comment?._reportCount._hex, 16),
+        content: comment?._content,
+      };
+      return filteredCommentResponse;
     }
     return false;
   } catch (error) {

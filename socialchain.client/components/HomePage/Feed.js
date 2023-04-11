@@ -20,6 +20,7 @@ import Image from "next/image";
 import { Form } from "antd";
 import { motion } from "framer-motion";
 import {
+  createComment,
   createNewPost,
   getFeedPosts,
   getUserPosts,
@@ -150,9 +151,43 @@ export const Feed = ({ isUserProfile }) => {
   };
 
   const submitCommentHandler = async (postId) => {
-    console.log("The post Id =>", postId);
-    console.log("The comment to be sended => ", commentInputFieldValue);
-    console.log("The commenter address => ", auth?.accountAddress);
+    const result = await createComment(postId, commentInputFieldValue);
+    if (result) {
+      console.log(result);
+      //[1]- Add the comment to the specified comment list of a post (comment object should be full)
+      if (isUserProfile) {
+        setUserPosts((prevUserPosts) => {
+          const updatedUserPosts = prevUserPosts.map((post) => {
+            if (post?.postId === postId) {
+              return {
+                ...post,
+                comments: [result, ...post.comments],
+              };
+            } else {
+              return post;
+            }
+          });
+        });
+      }
+      setFeedPosts((prevFeedPosts) => {
+        const updatedFeedPosts = prevFeedPosts.map((post) => {
+          if (post?.postId === postId) {
+            return {
+              ...post,
+              comments: [result, ...post.comments],
+            };
+          } else {
+            return post;
+          }
+        });
+
+        return updatedFeedPosts;
+      });
+      setCommentInputFieldValue("");
+      return true;
+    } else {
+      console.log("Error creating comment");
+    }
   };
   //#endregion
 
@@ -186,7 +221,6 @@ export const Feed = ({ isUserProfile }) => {
         setUserPosts(userPostsTemp);
       } else {
         const postIds = await getFeedPosts(1, 10);
-        console.log(postIds);
         setFeedPosts(postIds);
       }
     }
@@ -367,7 +401,6 @@ export const Feed = ({ isUserProfile }) => {
           </div>
         </Form>
         {/* Posts */}
-
         {isUserProfile
           ? userPosts.map((post, index) => (
               <div
@@ -468,103 +501,27 @@ export const Feed = ({ isUserProfile }) => {
                 <div className=" relative">
                   <div
                     className="scrollbar-thin scrollbar-thumb-primaryGoldColor scrollbar-track-darkBlue scrollbar-rounded-lg
-                  max-h-[200px] flex flex-col gap-y-3 min-h-[100px] overflow-y-scroll"
+                  max-h-[200px] flex flex-col gap-y-3 min-h-fit overflow-y-scroll"
                   >
                     {/* First comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
+                    {post?.comments?.map((comment) => (
+                      <div className="flex gap-x-2 items-center">
+                        <div>
+                          <Image
+                            src={`https://ipfs.io/ipfs/${comment?.author?.imageHash}`}
+                            className="rounded-full"
+                            width={32}
+                            height={32}
+                          />
+                        </div>
+                        <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
+                          <p className="text-md">{comment?.author?.userName}</p>
+                          <p className="text-sm">{comment?.content}</p>
+                        </div>
                       </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">
-                          This game is my favourit game all the time it is so
-                          realistic
-                        </p>
-                      </div>
-                    </div>
-                    {/* Second comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
-                      </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">I don't like it</p>
-                      </div>
-                    </div>
-                    {/* Third comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
-                      </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">I don't like it</p>
-                      </div>
-                    </div>
-                    {/* Fourth comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
-                      </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">I don't like it</p>
-                      </div>
-                    </div>
-                    {/* Fifth comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
-                      </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">I don't like it</p>
-                      </div>
-                    </div>
-                    {/* Sixth comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
-                      </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">I don't like it</p>
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                  <p className="text-white mt-6 hover:underline hover:cursor-pointer">
+                  <p className="text-white mt-5 hover:underline hover:cursor-pointer">
                     Show more comments
                   </p>
                 </div>
@@ -670,103 +627,40 @@ export const Feed = ({ isUserProfile }) => {
                 <div className=" relative">
                   <div
                     className="scrollbar-thin scrollbar-thumb-primaryGoldColor scrollbar-track-darkBlue scrollbar-rounded-lg
-                  max-h-[200px] flex flex-col gap-y-3 min-h-[100px] overflow-y-scroll"
+                  max-h-[200px] flex flex-col gap-y-3 min-h-fit overflow-y-scroll"
                   >
                     {/* First comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
+                    {post?.comments?.map((comment) => (
+                      <div className="flex gap-x-2 items-center pr-6">
+                        <div>
+                          <Image
+                            src={`https://ipfs.io/ipfs/${comment?.author?.imageHash}`}
+                            className="rounded-full"
+                            width={32}
+                            height={32}
+                          />
+                        </div>
+                        <div className="text-gray-300   ">
+                          <div className="bg-darkBlue p-2 rounded-lg">
+                            {" "}
+                            <p className="text-md">
+                              {comment?.author?.userName}
+                            </p>
+                            <p className="text-sm">{comment?.content}</p>
+                          </div>
+
+                          <div className="flex text-gray-400">
+                            <div className="flex gap-x-4">
+                              <p>Like</p>
+                              <p>Report</p>
+                              <p>{comment?.timeStamp}</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">
-                          This game is my favourit game all the time it is so
-                          realistic
-                        </p>
-                      </div>
-                    </div>
-                    {/* Second comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
-                      </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">I don't like it</p>
-                      </div>
-                    </div>
-                    {/* Third comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
-                      </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">I don't like it</p>
-                      </div>
-                    </div>
-                    {/* Fourth comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
-                      </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">I don't like it</p>
-                      </div>
-                    </div>
-                    {/* Fifth comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
-                      </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">I don't like it</p>
-                      </div>
-                    </div>
-                    {/* Sixth comment */}
-                    <div className="flex gap-x-2 items-center">
-                      <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          className="rounded-full"
-                          width={32}
-                          height={32}
-                        />
-                      </div>
-                      <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                        <p className="text-md">ahmed7am1d</p>
-                        <p className="text-sm">I don't like it</p>
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                  <p className="text-white mt-6 hover:underline hover:cursor-pointer">
+                  <p className="text-white mt-5 hover:underline hover:cursor-pointer">
                     Show more comments
                   </p>
                 </div>
