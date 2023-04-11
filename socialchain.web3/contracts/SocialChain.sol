@@ -8,6 +8,7 @@ contract SocialChain {
     address payable public owner; //Owner is also a maintainer
     uint public totalUsers = 0;
     uint public totalPosts = 0;
+    uint public totalComments = 0;
     uint[] private postIds;
 
     constructor() {
@@ -48,6 +49,7 @@ contract SocialChain {
         uint likeCount;
         uint reportCount;
         uint timeStamp;
+        commentStatus status;
     }
 
     //mapping to get user details from user address
@@ -64,6 +66,13 @@ contract SocialChain {
     //mapping to track who like which post
     mapping(uint => mapping(address => bool)) private postLikers;
 
+    //mapping to get comment by comment id
+    mapping(uint => Comment) private comments;
+    //mapping to get all user comments [comment's ids] from account address
+    mapping(address => uint[]) userComments;
+    //mapping to get all comments for specific post
+    mapping(uint => uint[]) private postComments;
+
     event logRegisterUser(address userAddress, uint userId);
     event logPostCreated(address _author, uint _userId, uint _postId);
 
@@ -76,6 +85,12 @@ contract SocialChain {
     }
 
     enum postStatus {
+        NP,
+        Active,
+        Banned,
+        Deleted
+    }
+    enum commentStatus {
         NP,
         Active,
         Banned,
@@ -109,9 +124,16 @@ contract SocialChain {
         );
         _;
     }
+    modifier onlyActiveComment(uint commentId) {
+        require(
+            comments[commentId].status == commentStatus.Active,
+            "Not an active comment"
+        );
+        _;
+    }
 
     /*
-     **************************************USER FUNCTIONS********************************************************************************
+     ###########################################USER FUNCTIONS###########################################
      */
     function userNameAvailable(
         string memory _username
@@ -189,8 +211,9 @@ contract SocialChain {
     }
 
     /*
-     **************************************POST FUNCTIONS***********************************************************
+     ###########################################POST FUNCTIONS###########################################
      */
+    
     //--------ATTENTIONS:
     //-- THIS FUNCTION NEED TO BE MODIFIED SO THAT ONLY ALLOWED USERS CAN POST
     //-- The function should create the post by only the message sender address not by sending the address
@@ -251,13 +274,15 @@ contract SocialChain {
             end = postIds.length;
         }
         uint[] memory result = new uint[](end - start);
-        for(uint i = start ; i < end; i++) {
-            result[i-start] = postIds[i];
+        for (uint i = start; i < end; i++) {
+            result[i - start] = postIds[i];
         }
         return result;
     }
 
-    function likePost(uint _postId) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
+    function likePost(
+        uint _postId
+    ) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
         //[1]- The post should not be liked already by the specfic user (should return false)
         require(!postLikers[_postId][msg.sender]);
         //[2]- increase number of likes for the specfied post:
@@ -266,16 +291,96 @@ contract SocialChain {
         postLikers[_postId][msg.sender] = true;
     }
 
-    function unLikePost(uint _postId) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
-        //[1]- Post should be like already by the speicifc user 
+    function unLikePost(
+        uint _postId
+    ) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
+        //[1]- Post should be like already by the speicifc user
         require(postLikers[_postId][msg.sender]);
         //[2]- decrase number of likes for the specfied post:
-        posts[_postId].likeCount = posts[_postId].likeCount-  1;
+        posts[_postId].likeCount = posts[_postId].likeCount - 1;
         //[3]- set that the specified user liked the post
         postLikers[_postId][msg.sender] = false;
     }
 
-    function isLikedByAddress(uint _postId, address _userAddress) public onlyActivePost(_postId) onlyAllowedUser(_userAddress) view returns (bool) {
+    function isLikedByAddress(
+        uint _postId,
+        address _userAddress
+    )
+        public
+        view
+        onlyActivePost(_postId)
+        onlyAllowedUser(_userAddress)
+        returns (bool)
+    {
         return postLikers[_postId][_userAddress];
     }
+
+    /*
+     ###########################################COMMENT FUNCTIONS###########################################
+     */
+    function createComment(
+        uint _postId,
+        string memory _comment
+    ) public onlyAllowedUser(msg.sender) onlyActivePost(_postId) {
+        //[1]- make sure comment is not empty
+        bytes memory tempStringValidation = bytes(_comment);
+        require(tempStringValidation.length != 0, "Comment can not be empty !");
+        //[2]- Id incremental
+        totalComments = totalComments + 1;
+        uint commentId = totalComments;
+        //[3]- Adding the post to the mapping
+        comments[commentId] = Comment(
+            commentId,
+            msg.sender,
+            _postId,
+            _comment,
+            0,
+            0,
+            block.timestamp,
+            commentStatus.Active
+        );
+        //[4]- Adding the comment to the post mapping (Each post can have many comments)
+        postComments[_postId].push(commentId);
+    }
+
+    function getCommentById(
+        uint _commentId
+    )
+        public
+        view
+        onlyAllowedUser(msg.sender)
+        onlyActiveComment(_commentId)
+        returns (Comment memory)
+    {
+        return comments[_commentId];
+    }
+
+    function getPostComments(
+        uint _listNumber,
+        uint _commentPerList,
+        uint _postId
+    )
+        public
+        view
+        onlyAllowedUser(msg.sender)
+        onlyActivePost(_postId)
+        returns (Comment[] memory)
+    {
+        uint startIndex = (_listNumber - 1) * _commentPerList;
+        uint endIndex = startIndex + _commentPerList;
+        //to avoid IndexOutOfRangeException
+        if (endIndex > postComments[_postId].length) {
+            endIndex = postComments[_postId].length;
+        }
+        Comment[] memory commentsResponse = new Comment[](
+            endIndex - startIndex
+        );
+        uint tempCommentId = 0;
+        for (uint i = startIndex; i < endIndex; i++) {
+            tempCommentId = postComments[_postId][i];
+            commentsResponse[i - startIndex] = comments[tempCommentId];
+        }
+        return commentsResponse;
+    }
+
 }
