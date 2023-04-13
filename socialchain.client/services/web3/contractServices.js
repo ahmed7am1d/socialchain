@@ -8,6 +8,15 @@ import SocialChainContractConstants from "@/constants/blockchain/SocialChainCont
 import useAuth from "@/hooks/useAuth";
 import useIPFS from "@/hooks/useIPFS";
 
+/**
+ * This function retrieves a user's posts from a blockchain contract and formats the data for display.
+ * @returns null if the result from the contract is empty
+ * @returns The function `getUserPosts` returns an array of post objects, where each post object
+ * contains various properties such as author, postImgHash, likeCount, postDescription, postId,
+ * reportCount, timeStamp, isLikedByOwner, and comments. The function uses the ethers.js library to
+ * interact with a smart contract on the Ethereum blockchain to retrieve the user's posts and
+ * associated comments.
+ */
 export const getUserPosts = async () => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const contract = new ethers.Contract(
@@ -17,6 +26,10 @@ export const getUserPosts = async () => {
   );
   const accountAddresses = await provider.send("eth_requestAccounts", []);
   const result = await contract.getUserPosts(accountAddresses[0]);
+
+  if (result.length === 0) {
+    return null;
+  }
   //Result returns => array of post each post is an array of properties
   const userPostsTemp = result.map(async (onePost, index) => {
     //[1]- Transfer the post that is as array to object
@@ -58,6 +71,16 @@ export const getUserPosts = async () => {
   return await Promise.all(userPostsTemp);
 };
 
+/**
+ * This function retrieves a list of post objects from a smart contract on the Ethereum blockchain,
+ * including details such as post content, author information, and comments.
+ * @param page - The page parameter is the page number of the feed to retrieve. It is used to determine
+ * which set of posts to retrieve based on the number of posts per page.
+ * @param perPage - The number of posts to be returned per page.
+ * @returns null if result from contract is empty otherwise an array of post objects, where each post object contains details about a post, such as the
+ * author, post image hash, user profile image hash, like count, post description, post ID, report
+ * count, status, timestamp, username, and comments.
+ */
 export const getFeedPosts = async (page, perPage) => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const contract = new ethers.Contract(
@@ -67,6 +90,11 @@ export const getFeedPosts = async (page, perPage) => {
   );
   const accountAddresses = await provider.send("eth_requestAccounts", []);
   const result = await contract.getPostIds(page, perPage);
+
+  if (result.length === 0) {
+    return null;
+  }
+
   //[1]- Get all postIds
   const postIdsTemp = result.map((postId) => {
     return parseInt(postId?._hex, 16);
@@ -124,6 +152,23 @@ export const getFeedPosts = async (page, perPage) => {
   return await Promise.all(allPostObjects);
 };
 
+/**
+ * This function creates a new post object, uploads an image to IPFS if provided, interacts with a
+ * smart contract to create a new post, and returns the created post object.
+ * @param postDescription - The description or caption of the post that the user wants to create.
+ * @param selectedProfilePictureFile - This parameter is the file object of the selected profile
+ * picture that the user wants to upload.
+ * @param selectedProfilePictureSrc - It is a string representing the source URL of the selected
+ * profile picture.
+ * @param uploadFileToIPFS - A function that takes a file object as input and uploads it to IPFS
+ * (InterPlanetary File System), a decentralized file storage system.
+ * @param auth - An object containing the user's authentication information, such as their account
+ * address, username, and image hash.
+ * @returns a Promise that resolves to a newCreatedPostObjectResponse object, which contains
+ * information about the newly created post, such as the author, user name, user profile image hash,
+ * post image hash, like count, post description, post ID, report count, time stamp, and user ID.
+ * @returns false if creating of post is failed
+ */
 export const createNewPost = async (
   postDescription,
   selectedProfilePictureFile,
@@ -182,19 +227,21 @@ export const createNewPost = async (
     newCreatePostObjectRequest.imageHash
   );
   const transactionResult = await transaction.wait();
-
-  //[5]- Add the post to the user list
-  newCreatedPostObjectResponse.author =
-    transactionResult.events[0].args._author;
-  newCreatedPostObjectResponse.postId = parseInt(
-    transactionResult.events[0].args._postId._hex,
-    16
-  );
-  newCreatedPostObjectResponse.userId = parseInt(
-    transactionResult.events[0].args._userId._hex,
-    16
-  );
-  return newCreatedPostObjectResponse;
+  if (transactionResult?.status === 1) {
+    //[5]- Add the post to the user list
+    newCreatedPostObjectResponse.author =
+      transactionResult.events[0].args._author;
+    newCreatedPostObjectResponse.postId = parseInt(
+      transactionResult.events[0].args._postId._hex,
+      16
+    );
+    newCreatedPostObjectResponse.userId = parseInt(
+      transactionResult.events[0].args._userId._hex,
+      16
+    );
+    return newCreatedPostObjectResponse;
+  }
+  return false;
 };
 
 /**
@@ -253,6 +300,15 @@ export const unLikePost = async (postId) => {
   }
 };
 
+/**
+ * This function creates a comment on a post using the Ethereum blockchain and returns the filtered
+ * comment response.
+ * @param postId - The ID of the post to which the comment is being added.
+ * @param comment - The `comment` parameter is the content of the comment that the user wants to create
+ * for a specific post.
+ * @returns a filtered comment response object if the transaction is successful, otherwise it returns
+ * false.
+ */
 export const createComment = async (postId, comment) => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();

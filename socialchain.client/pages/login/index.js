@@ -210,6 +210,7 @@ const login = () => {
           return false;
         }
       } catch (e) {
+        console.log(e);
         messageApi.open({
           type: "error",
           content:
