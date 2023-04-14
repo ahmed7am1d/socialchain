@@ -134,8 +134,11 @@ const login = () => {
             );
             userRegisterObject.ipfsProfilePictureHash = ipfsProfilePictureHash;
           } catch (error) {
-            console.error(error);
-            // handle error of ipfs uploading
+            messageApi.open({
+              type: "error",
+              content:
+                "Failed to upload image to IPFS !!",
+            });
           }
         }
 
@@ -205,7 +208,7 @@ const login = () => {
         } catch (e) {
           messageApi.open({
             type: "error",
-            content: "You have to sign the message to register to get JWT !!",
+            content: "You have to sign the message to be able to access the website pages!!",
           });
           return false;
         }
@@ -213,7 +216,7 @@ const login = () => {
         messageApi.open({
           type: "error",
           content:
-            "You have to connect to your account to be able to continue !!",
+            "You have to connect your wallet to continue !!",
         });
         return false;
       }
