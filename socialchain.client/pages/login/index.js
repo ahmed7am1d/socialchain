@@ -213,6 +213,7 @@ const login = () => {
           return false;
         }
       } catch (e) {
+        console.log(e);
         messageApi.open({
           type: "error",
           content:
@@ -273,7 +274,6 @@ const login = () => {
         accountAddresses[0]
       );
       if (isRegisteredUserResult === true) {
-        console.log("Registered User");
         //[A]- nonce
         const messageTempToken = await nonce(accountAddresses[0]);
         //[B]- get user signature

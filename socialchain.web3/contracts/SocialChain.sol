@@ -75,7 +75,7 @@ contract SocialChain {
 
     event logRegisterUser(address userAddress, uint userId);
     event logPostCreated(address _author, uint _userId, uint _postId);
-
+    event logCommentCreated(address _author,uint _commentId,uint _postId, uint _likeCount, uint _reportCount, uint _timeStamp, string _content);
     enum accountStatus {
         //NP Stand for = Not present
         NP,
@@ -341,6 +341,9 @@ contract SocialChain {
         );
         //[4]- Adding the comment to the post mapping (Each post can have many comments)
         postComments[_postId].push(commentId);
+        //[5]- Log the created comment 
+        //    event logCommentCreated(address _author,uint _commentId,uint _postId, uint _likeCount, uint _reportCount, uint _timeStamp, string _content);
+        emit logCommentCreated(msg.sender,commentId,_postId,0,0,block.timestamp,_comment);
     }
 
     function getCommentById(
