@@ -22,6 +22,7 @@ import {
   createComment,
   createNewPost,
   getFeedPosts,
+  getPostComments,
   getUserPosts,
   likePost,
   unLikePost,
@@ -46,7 +47,10 @@ export const Feed = ({ isUserProfile }) => {
   const [selectedProfilePictureSrcBytes, setSelectedProfilePictureSrcBytes] =
     useState("");
   const [celebrateLikePost, setCelebrateLikePost] = useState({});
+  const [celebrateLikePostModal, setCelebrateLikePostModal] = useState({});
   const [commentInputFieldValue, setCommentInputFieldValue] = useState("");
+  let [postModalPagination, setPostModalPagination] = useState(3);
+
   //#endregion
 
   //#region handling
@@ -79,40 +83,60 @@ export const Feed = ({ isUserProfile }) => {
     imageRef.current.click();
   };
 
-  const handleLikePost = async (postId, postIsAlreadyLiked) => {
+  const handleLikePost = async (isPostModal, postId, postIsAlreadyLiked) => {
     if (postIsAlreadyLiked) {
       const postIsUnLiked = await unLikePost(postId);
       if (postIsUnLiked) {
-        isUserProfile
-          ? setUserPosts((current) =>
-              current.map((obj) => {
-                if (obj.postId === postId) {
-                  return {
-                    ...obj,
-                    likeCount: obj?.likeCount - 1,
-                    isLikedByOwner: false,
-                  };
-                }
-                return obj;
-              })
-            )
-          : setFeedPosts((current) =>
-              current.map((obj) => {
-                if (obj.postId === postId) {
-                  return {
-                    ...obj,
-                    likeCount: obj?.likeCount - 1,
-                    isLikedByOwner: false,
-                  };
-                }
-                return obj;
-              })
-            );
-        //Remove the like
-        setCelebrateLikePost({
-          isPostLiked: false,
-          postId: postId,
-        });
+        if (isPostModal) {
+          setPostModalData((current) => {
+            return {
+              ...current,
+              likeCount: current?.likeCount - 1,
+              isLikedByOwner: false,
+            };
+          });
+        }
+        if (isUserProfile) {
+          setUserPosts((current) =>
+            current.map((obj) => {
+              if (obj.postId === postId) {
+                return {
+                  ...obj,
+                  likeCount: obj?.likeCount - 1,
+                  isLikedByOwner: false,
+                };
+              }
+              return obj;
+            })
+          );
+        } else {
+          setFeedPosts((current) =>
+            current.map((obj) => {
+              if (obj.postId === postId) {
+                return {
+                  ...obj,
+                  likeCount: obj?.likeCount - 1,
+                  isLikedByOwner: false,
+                };
+              }
+              return obj;
+            })
+          );
+        }
+        if (isPostModal) {
+          //Remove the like from post modal
+          setCelebrateLikePostModal({
+            isPostLiked: false,
+            postId: postId,
+          });
+        } else {
+          //Remove the like from original post
+          setCelebrateLikePost({
+            isPostLiked: false,
+            postId: postId,
+          });
+        }
+
         return true;
       }
       messageApi.open({
@@ -124,6 +148,15 @@ export const Feed = ({ isUserProfile }) => {
       const postIsLikedResult = await likePost(postId);
       //[2]- If function return true then increase in the current list post the like counter
       if (postIsLikedResult) {
+        if (isPostModal) {
+          setPostModalData((current) => {
+            return {
+              ...current,
+              likeCount: current?.likeCount + 1,
+              isLikedByOwner: true,
+            };
+          });
+        }
         isUserProfile
           ? setUserPosts((current) =>
               current.map((obj) => {
@@ -149,11 +182,19 @@ export const Feed = ({ isUserProfile }) => {
                 return obj;
               })
             );
-        //show animation
-        setCelebrateLikePost({
-          isPostLiked: true,
-          postId: postId,
-        });
+        if (isPostModal) {
+          //Remove the like from post modal
+          setCelebrateLikePostModal({
+            isPostLiked: true,
+            postId: postId,
+          });
+        } else {
+          //Remove the like from original post
+          setCelebrateLikePost({
+            isPostLiked: true,
+            postId: postId,
+          });
+        }
         return true;
       }
       messageApi.open({
@@ -163,18 +204,26 @@ export const Feed = ({ isUserProfile }) => {
     }
   };
 
-  const submitCommentHandler = async (postId) => {
+  const submitCommentHandler = async (isPostModal, postId) => {
     const result = await createComment(postId, commentInputFieldValue);
     if (result) {
       console.log(result);
-      //[1]- Add the comment to the specified comment list of a post (comment object should be full)
+      //[1]- Add the comment to the specified comment list of a post [userPost,feedPosts,modalPosts]
+      if (isPostModal) {
+        setPostModalData((prev) => {
+          return {
+            ...prev,
+            comments: [result, ...prev?.comments],
+          };
+        });
+      }
       if (isUserProfile) {
         setUserPosts((prevUserPosts) => {
           const updatedUserPosts = prevUserPosts.map((post) => {
             if (post?.postId === postId) {
               return {
                 ...post,
-                comments: [result, ...post.comments],
+                comments: [result, ...post?.comments],
               };
             } else {
               return post;
@@ -190,7 +239,7 @@ export const Feed = ({ isUserProfile }) => {
           if (post?.postId === postId) {
             return {
               ...post,
-              comments: [result, ...post.comments],
+              comments: [result, ...post?.comments],
             };
           } else {
             return post;
@@ -206,12 +255,48 @@ export const Feed = ({ isUserProfile }) => {
     }
   };
 
-  const handlePostModal = async (post) => {
+  const handlePostModalOpen = async (post) => {
     if (post) {
       setPostModalData(post);
-      console.log(post);
     }
-    setIsModalOpen(!isPostModalOpen);
+    setIsModalOpen(true);
+  };
+  const handlePostModalClose = async () => {
+    setIsModalOpen(false);
+    setPostModalPagination(0);
+  };
+
+  const handleShowMorePostModal = async () => {
+    //[1]- Make sure the comments for the post is more than 2
+    if (postModalData?.comments.length > 2) {
+      if (postModalPagination !== 0) {
+        setPostModalPagination(postModalPagination + 1);
+        const comments = await getPostComments(
+          postModalData?.postId,
+          postModalPagination,
+          1
+        );
+        console.log("Result from the contract => ", comments);
+
+        //[4]- insert the comments to the modal
+        setPostModalData((prev) => {
+          // If the new comments have already been saved, don't update the state
+          const existingCommentIds = prev.comments.map(
+            (comment) => comment.commentId
+          );
+          const newComments = comments.filter(
+            (comment) => !existingCommentIds.includes(comment.commentId)
+          );
+          if (newComments.length === 0) {
+            setPostModalPagination(0);
+            return prev;
+          }
+          // Otherwise, add the new comments to the state
+          const allComments = [...prev.comments, ...newComments];
+          return { ...prev, comments: allComments };
+        });
+      }
+    }
   };
   //#endregion
 
@@ -276,7 +361,7 @@ export const Feed = ({ isUserProfile }) => {
               {/* Close Button */}
               <div className="flex justify-end">
                 <button
-                  onClick={() => handlePostModal()}
+                  onClick={() => handlePostModalClose()}
                   type="button"
                   className="text-white bg-darkBlue rounded-full p-1"
                   data-modal-hide="authentication-modal"
@@ -298,7 +383,7 @@ export const Feed = ({ isUserProfile }) => {
               </div>
 
               {/* Author name */}
-              <div className="text-center text-white mb-4 text-lg">
+              <div className="text-center text-white mb-4 text-lg font-sans font-semibold">
                 <div>{postModalData?.userName}'s post</div>
               </div>
               <hr />
@@ -309,7 +394,7 @@ export const Feed = ({ isUserProfile }) => {
             "
               >
                 {/* Created by */}
-                <div className="flex justify-between">
+                <div className="flex justify-between font-sans">
                   <div className="flex items-center gap-x-5 text-white">
                     <div>
                       <Image
@@ -339,11 +424,11 @@ export const Feed = ({ isUserProfile }) => {
                 </div>
                 {/* Post Image */}
                 {postModalData?.postImgHash && (
-                  <div className="flex justify-center w-full relative pt-[50%]">
+                  <div className="flex justify-center w-full relative pt-[50%] ">
                     <Image
                       objectFit="contain"
                       fill
-                      className="w-full h-full top-0 left-0 object-contain rounded-2xl"
+                      className="w-full h-full top-0 left-0 object-contain "
                       src={`https://ipfs.io/ipfs/${postModalData?.postImgHash}`}
                       alt="Post image"
                     />
@@ -351,8 +436,9 @@ export const Feed = ({ isUserProfile }) => {
                 )}
                 {/* Like - comment - share */}
                 <div className=" px-2 relative flex gap-x-6 text-white">
-                  {celebrateLikePost?.isPostLiked &&
-                    celebrateLikePost?.postId === postModalData?.postId && (
+                  {celebrateLikePostModal?.isPostLiked &&
+                    celebrateLikePostModal?.postId ===
+                      postModalData?.postId && (
                       <ConfettiExplosion
                         duration={4000}
                         particleCount={50}
@@ -369,6 +455,7 @@ export const Feed = ({ isUserProfile }) => {
                     } `}
                     onClick={() =>
                       handleLikePost(
+                        true,
                         postModalData?.postId,
                         postModalData?.isLikedByOwner
                       )
@@ -379,7 +466,11 @@ export const Feed = ({ isUserProfile }) => {
                   </div>
                   <div className="flex items-center justify-center gap-x-2">
                     <CommentOutlined />
-                    <span>{postModalData?.comments?.length}</span>
+                    <span>
+                      {postModalData?.comments?.length
+                        ? postModalData?.comments?.length
+                        : "0"}
+                    </span>
                   </div>
                   <div className="flex items-center justify-center gap-x-2">
                     <ShareAltOutlined />
@@ -400,7 +491,9 @@ export const Feed = ({ isUserProfile }) => {
                   />
                   <SendOutlined
                     className="text-white absolute top-[15px] right-3"
-                    onClick={() => submitCommentHandler(postModalData?.postId)}
+                    onClick={() =>
+                      submitCommentHandler(true, postModalData?.postId)
+                    }
                   />
                 </div>
                 {/*comments */}
@@ -409,9 +502,11 @@ export const Feed = ({ isUserProfile }) => {
                     className="
                    flex flex-col gap-y-3 min-h-fit"
                   >
-                    {/* First comment */}
                     {postModalData?.comments?.map((comment) => (
-                      <div className="flex gap-x-2 items-center pr-6">
+                      <div
+                        className="flex gap-x-2 items-center pr-6"
+                        key={comment?.commentId}
+                      >
                         <div>
                           <Image
                             src={`https://ipfs.io/ipfs/${comment?.author?.imageHash}`}
@@ -440,12 +535,14 @@ export const Feed = ({ isUserProfile }) => {
                       </div>
                     ))}
                   </div>
-                  <p
-                    className="text-white mt-5 hover:underline hover:cursor-pointer"
-                    onClick={() => handlePostModal(post)}
-                  >
-                    Show more comments
-                  </p>
+                  {postModalPagination !== 0 && postModalData?.comment?.length >= 3 && (
+                    <p
+                      className="text-white mt-5 hover:underline hover:cursor-pointer"
+                      onClick={() => handleShowMorePostModal()}
+                    >
+                      Show more comments
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -460,7 +557,7 @@ export const Feed = ({ isUserProfile }) => {
       >
         <aside className="hidden lg:flex lg:flex-col lg:gap-y-8 text-sm">
           {/* About me */}
-          <div className="p-3 relative font-poppins">
+          <div className="p-3 relative font-sans">
             <div className="absolute inset-0 rounded-md bg-darkBlue opacity-40"></div>
             <div className="relative flex justify-between items-center text-white">
               <h1 className="text-gray-500 uppercase font-mono">About me</h1>
@@ -479,7 +576,7 @@ export const Feed = ({ isUserProfile }) => {
               </div>
             </div>
             <div className="relative p-3">
-              <p className="text-white font-mono">Winter blockchain event</p>
+              <p className="text-white font-sans">Winter blockchain event</p>
               <p className="text-gray-500">01st Jan, 2024 07:00AM</p>
             </div>
           </div>
@@ -589,7 +686,7 @@ export const Feed = ({ isUserProfile }) => {
               />
             </Form.Item>
             {/* button - type and additional feelings */}
-            <div className="flex items-center justify-between w-full text-gray-400">
+            <div className="flex items-center justify-between w-full text-gray-400 font-sans">
               <div className="flex flex-row w-full gap-x-7">
                 <div className="flex gap-x-2">
                   <Image
@@ -645,13 +742,20 @@ export const Feed = ({ isUserProfile }) => {
                   className="p-4 bg-darkBlueHalfTrans mt-5 flex flex-col gap-y-5 rounded-md"
                 >
                   {/* user info - created by */}
-                  <div className="flex justify-between">
+                  <div className="flex justify-between font-sans">
                     <div className="flex items-center gap-x-5 text-white">
-                      <div>
+                      <div
+                        className={`
+                                h-6 w-6
+                                p-4
+                                md:h-9
+                                md:w-9
+                                flex relative overflow-hidden rounded-full `}
+                      >
                         <Image
-                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                          width={40}
-                          height={40}
+                          src={`https://ipfs.io/ipfs/${post?.userProfileImgHash}`}
+                          layout="fill"
+                          objectFit="cover"
                           className="rounded-full"
                           alt="Profile picture"
                         />
@@ -702,7 +806,11 @@ export const Feed = ({ isUserProfile }) => {
                           : homePageStyle.likeButtonContainer
                       } `}
                       onClick={() =>
-                        handleLikePost(post?.postId, post?.isLikedByOwner)
+                        handleLikePost(
+                          false,
+                          post?.postId,
+                          post?.isLikedByOwner
+                        )
                       }
                     >
                       <HeartFilled />
@@ -710,7 +818,7 @@ export const Feed = ({ isUserProfile }) => {
                     </div>
                     <div className="flex items-center justify-center gap-x-2">
                       <CommentOutlined />
-                      <span>{post?.comments?.length}</span>
+                      <span>{post?.comments?.length ? post?.comments?.length : "0" }</span>
                     </div>
                     <div className="flex items-center justify-center gap-x-2">
                       <ShareAltOutlined />
@@ -733,7 +841,7 @@ export const Feed = ({ isUserProfile }) => {
                     />
                     <SendOutlined
                       className="text-white absolute top-[15px] right-3"
-                      onClick={() => submitCommentHandler(post?.postId)}
+                      onClick={() => submitCommentHandler(false, post?.postId)}
                     />
                   </div>
                   {/*comments */}
@@ -742,27 +850,51 @@ export const Feed = ({ isUserProfile }) => {
                       className="scrollbar-thin scrollbar-thumb-primaryGoldColor scrollbar-track-darkBlue scrollbar-rounded-lg
                   max-h-[200px] flex flex-col gap-y-3 min-h-fit overflow-y-scroll"
                     >
-                      {/* First comment */}
                       {post?.comments?.map((comment) => (
-                        <div className="flex gap-x-2 items-center">
-                          <div>
+                        <div
+                          className="flex gap-x-2 items-center"
+                          key={comment?.commentId}
+                        >
+                          <div
+                            className={`
+                            mb-3
+                                h-8 w-8
+                                md:h-10
+                                md:w-10
+                                flex relative overflow-hidden rounded-full `}
+                          >
                             <Image
                               src={`https://ipfs.io/ipfs/${comment?.author?.imageHash}`}
+                              layout="fill"
+                              objectFit="cover"
                               className="rounded-full"
-                              width={32}
-                              height={32}
+                              alt="Profile picture"
                             />
                           </div>
-                          <div className="text-gray-300 bg-darkBlue p-2 rounded-lg">
-                            <p className="text-md">
-                              {comment?.author?.userName}
-                            </p>
-                            <p className="text-sm">{comment?.content}</p>
+                          <div className="text-gray-300   ">
+                            <div className="bg-darkBlue p-2 rounded-lg">
+                              {" "}
+                              <p className="text-md">
+                                {comment?.author?.userName}
+                              </p>
+                              <p className="text-sm">{comment?.content}</p>
+                            </div>
+
+                            <div className="flex text-gray-400">
+                              <div className="flex gap-x-4">
+                                <p>Like</p>
+                                <p>Report</p>
+                                <p>{comment?.timeStamp}</p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
-                    <p className="text-white mt-5 hover:underline hover:cursor-pointer">
+                    <p
+                      className="text-white mt-5 hover:underline hover:cursor-pointer"
+                      onClick={() => handlePostModalOpen(post)}
+                    >
                       Show more comments
                     </p>
                   </div>
@@ -774,16 +906,25 @@ export const Feed = ({ isUserProfile }) => {
                   className="p-4 bg-darkBlueHalfTrans mt-5 flex flex-col gap-y-5 rounded-md"
                 >
                   {/* user info - created by */}
-                  <div className="flex justify-between">
-                    <div className="flex items-center gap-x-5 text-white">
+                  <div className="flex justify-between font-sans">
+                    <div className="flex items-center gap-x-5 text-white rounded-full">
                       <div>
-                        <Image
-                          src={`https://ipfs.io/ipfs/${post?.userProfileImgHash}`}
-                          width={40}
-                          height={40}
-                          className="rounded-full"
-                          alt="Profile picture"
-                        />
+                        <div
+                          className={`
+                                h-6 w-6
+                                p-4
+                                md:h-9
+                                md:w-9
+                                flex relative overflow-hidden rounded-full `}
+                        >
+                          <Image
+                            src={`https://ipfs.io/ipfs/${post?.userProfileImgHash}`}
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded-full"
+                            alt="Profile picture"
+                          />
+                        </div>
                       </div>
                       <div>
                         <p>
@@ -832,7 +973,11 @@ export const Feed = ({ isUserProfile }) => {
                           : homePageStyle.likeButtonContainer
                       } `}
                       onClick={() =>
-                        handleLikePost(post?.postId, post?.isLikedByOwner)
+                        handleLikePost(
+                          false,
+                          post?.postId,
+                          post?.isLikedByOwner
+                        )
                       }
                     >
                       <HeartFilled />
@@ -840,7 +985,7 @@ export const Feed = ({ isUserProfile }) => {
                     </div>
                     <div className="flex items-center justify-center gap-x-2">
                       <CommentOutlined />
-                      <span>{post?.comments?.length}</span>
+                      <span>{post?.comments?.length ? post?.comments?.length : "0" }</span>
                     </div>
                     <div className="flex items-center justify-center gap-x-2">
                       <ShareAltOutlined />
@@ -863,7 +1008,7 @@ export const Feed = ({ isUserProfile }) => {
                     />
                     <SendOutlined
                       className="text-white absolute top-[15px] right-3"
-                      onClick={() => submitCommentHandler(post?.postId)}
+                      onClick={() => submitCommentHandler(false, post?.postId)}
                     />
                   </div>
                   {/*comments */}
@@ -872,17 +1017,28 @@ export const Feed = ({ isUserProfile }) => {
                       className="scrollbar-thin scrollbar-thumb-primaryGoldColor scrollbar-track-darkBlue scrollbar-rounded-lg
                   max-h-[200px] flex flex-col gap-y-3 min-h-fit overflow-y-scroll"
                     >
-                      {/* First comment */}
                       {post?.comments?.map((comment) => (
-                        <div className="flex gap-x-2 items-center pr-6">
-                          <div>
+                        <div
+                          className="flex gap-x-2 items-center pr-6"
+                          key={comment?.commentId}
+                        >
+                          <div
+                            className={`
+                            mb-3
+                                h-8 w-8
+                                md:h-10
+                                md:w-10
+                                flex relative overflow-hidden rounded-full `}
+                          >
                             <Image
                               src={`https://ipfs.io/ipfs/${comment?.author?.imageHash}`}
+                              layout="fill"
+                              objectFit="cover"
                               className="rounded-full"
-                              width={32}
-                              height={32}
+                              alt="Profile picture"
                             />
                           </div>
+
                           <div className="text-gray-300   ">
                             <div className="bg-darkBlue p-2 rounded-lg">
                               {" "}
@@ -905,7 +1061,7 @@ export const Feed = ({ isUserProfile }) => {
                     </div>
                     <p
                       className="text-white mt-5 hover:underline hover:cursor-pointer"
-                      onClick={() => handlePostModal(post)}
+                      onClick={() => handlePostModalOpen(post)}
                     >
                       Show more comments
                     </p>

@@ -5,8 +5,6 @@ import {
 } from "@/utils/Date/dateUtils";
 import socialChainContractABI from "../../contract-artifacts/contracts/SocialChain.sol/SocialChain.json";
 import SocialChainContractConstants from "@/constants/blockchain/SocialChainContractConstants";
-import useAuth from "@/hooks/useAuth";
-import useIPFS from "@/hooks/useIPFS";
 
 /**
  * This function retrieves a user's posts from a blockchain contract and formats the data for display.
@@ -38,26 +36,42 @@ export const getUserPosts = async () => {
     const unixDate = parseInt(tempObj.timeStamp._hex, 16);
     const date = await UnixDateToiSO860StringDate(unixDate);
     const timeDifferenceResult = await calculateTimeDifferenceString(date);
+    //For each post get user object to get his image hash
+    const userObject = await contract.getUser(tempObj.author);
+    const userProfileImageHash = userObject?.imageHash;
     let postComments = await contract.getPostComments(
       1,
       3,
       parseInt(tempObj.postId._hex, 16)
     );
+
     let filteredComments = postComments?.map(async (comment) => {
       let commentAuthorAddress = comment?.author;
+      const unixDate = parseInt(comment.timeStamp._hex, 16);
+      const date = await UnixDateToiSO860StringDate(unixDate);
+      const timeDifferenceResult = await calculateTimeDifferenceString(date);
+
       return {
-        ...comment,
         author: Object.assign({}, await contract.getUser(commentAuthorAddress)),
+        timeStamp: timeDifferenceResult,
+        commentId: parseInt(comment?.commentId._hex, 16),
+        likeCount: parseInt(comment?.likeCount._hex, 16),
+        reportCount: parseInt(comment?.reportCount._hex, 16),
+        content: comment?.content,
       };
     });
+
     const post = {
-      author: tempObj.author,
-      postImgHash: tempObj.imgHash,
-      likeCount: parseInt(tempObj.likeCount._hex, 16),
-      postDescription: tempObj.postDescription,
-      postId: parseInt(tempObj.postId._hex, 16),
-      reportCount: parseInt(tempObj.reportCount._hex, 16),
+      author: tempObj?.author,
+      postImgHash: tempObj?.imgHash,
+      userProfileImgHash: userProfileImageHash,
+      likeCount: parseInt(tempObj?.likeCount?._hex, 16),
+      postDescription: tempObj?.postDescription,
+      postId: parseInt(tempObj?.postId?._hex, 16),
+      reportCount: parseInt(tempObj?.reportCount?._hex, 16),
+      status: tempObj?.status,
       timeStamp: timeDifferenceResult,
+      userName: userObject?.userName,
       isLikedByOwner: await contract.isLikedByAddress(
         parseInt(tempObj.postId._hex, 16),
         accountAddresses[0]
@@ -112,7 +126,7 @@ export const getFeedPosts = async (page, perPage) => {
     //Return a post object with all necessary  details
     let postComments = await contract.getPostComments(
       1,
-      5,
+      3,
       parseInt(result.postId._hex, 16)
     );
     let filteredComments = postComments?.map(async (comment) => {
@@ -343,4 +357,36 @@ export const createComment = async (postId, comment) => {
     console.log(error);
     return false;
   }
+};
+
+export const getPostComments = async (postId, listNumber, commentPerList) => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(
+    SocialChainContractConstants.SOCIAL_CHAIN_CONTRACT_ADDRESS,
+    socialChainContractABI.abi,
+    signer
+  );
+  let postComments = await contract.getPostComments(
+    listNumber,
+    commentPerList,
+    postId
+  );
+
+  let filteredComments = postComments?.map(async (comment) => {
+    let commentAuthorAddress = comment?.author;
+    const unixDate = parseInt(comment.timeStamp._hex, 16);
+    const date = await UnixDateToiSO860StringDate(unixDate);
+    const timeDifferenceResult = await calculateTimeDifferenceString(date);
+    return {
+      author: Object.assign({}, await contract.getUser(commentAuthorAddress)),
+      timeStamp: timeDifferenceResult,
+      commentId: parseInt(comment?.commentId._hex, 16),
+      likeCount: parseInt(comment?.likeCount._hex, 16),
+      reportCount: parseInt(comment?.reportCount._hex, 16),
+      content: comment?.content,
+    };
+  });
+
+  return Promise.all(filteredComments);
 };
