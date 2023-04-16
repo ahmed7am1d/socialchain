@@ -114,8 +114,14 @@ module.exports = {
     artifacts: "../socialchain.client/contract-artifacts",
   },
   networks: {
+    // Hardhat local blockchain
     localNetwork: {
       url: "http://127.0.0.1:8545/",
     },
+    // Ganache local blockchain
+    localGanache: {
+      url:'HTTP://127.0.0.1:7545',
+      account:"0x641efb151b09909197dc33110d3bed8c63831095a859dac338120479f0b2ab05"
+    }
   },
 };
