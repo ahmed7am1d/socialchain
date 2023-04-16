@@ -2,10 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import useAuth from "@/hooks/useAuth";
 import useIPFS from "@/hooks/useIPFS";
 import fileToBase64 from "@/utils/Files/fileUtils";
-import peopleIcon from "../../assets/Icons/people.png";
-import checkInIcon from "../../assets/Icons/check-in.png";
-import moodIcon from "../../assets/Icons/moode.png";
-import { Upload, Users, NavigationArrow, MaskHappy } from "phosphor-react";
+import {
+  Upload,
+  Users,
+  NavigationArrow,
+  MaskHappy,
+  DotsThree,
+} from "phosphor-react";
 import blockChainEvent from "../../assets/Images/blockChainEvent.png";
 import {
   HeartFilled,
@@ -562,7 +565,9 @@ export const Feed = ({ isUserProfile }) => {
             <div className="absolute inset-0 rounded-md bg-darkBlue opacity-40"></div>
             <div className="relative flex justify-between items-center text-white">
               <h1 className="text-gray-500 uppercase font-mono">About me</h1>
-              <div>...</div>
+              <div className="text-gray-400">
+                <DotsThree size={24} />
+              </div>
             </div>
             <div className="text-gray-300 relative p-2 font-sans">
               <p className="text-sm">{auth.bio}</p>
@@ -681,19 +686,19 @@ export const Feed = ({ isUserProfile }) => {
             {/* button - type and additional feelings */}
             <div className="flex items-center justify-between w-full text-gray-400">
               <div className="flex flex-row w-full gap-x-7">
-                <div className="flex gap-x-2">
+                <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
                   <Users size={23} />
                   <p className="hidden sm:block md:block lg:block">
                     Tag a friend
                   </p>
                 </div>
-                <div className="flex gap-x-2">
+                <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
                   <NavigationArrow size={23} />
                   <p className="hidden sm:block md:block lg:block">
                     Share a location
                   </p>
                 </div>
-                <div className="flex gap-x-2">
+                <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
                   <MaskHappy size={23} />
                   <p className="hidden sm:block md:block lg:block">Mood</p>
                 </div>
@@ -746,7 +751,7 @@ export const Feed = ({ isUserProfile }) => {
                       </div>
                     </div>
                     <div className="text-gray-400">
-                      <p>...</p>
+                      <DotsThree size={24} />
                     </div>
                   </div>
                   {/* title of post*/}
@@ -914,7 +919,7 @@ export const Feed = ({ isUserProfile }) => {
                       </div>
                     </div>
                     <div className="text-gray-400">
-                      <p>...</p>
+                      <DotsThree size={24} />
                     </div>
                   </div>
                   {/* title of post*/}
