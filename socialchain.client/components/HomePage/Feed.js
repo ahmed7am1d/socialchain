@@ -398,31 +398,38 @@ export const Feed = ({ isUserProfile }) => {
               >
                 {/* Created by */}
                 <div className="flex justify-between font-sans">
-                  <div className="flex items-center gap-x-5 text-white">
-                    <div>
-                      <Image
-                        src={`https://ipfs.io/ipfs/${postModalData?.userProfileImgHash}`}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                        alt="Profile picture"
-                      />
+                    <div className="flex items-center gap-x-5 text-white rounded-full">
+                      <div>
+                        <div
+                          className={`
+                                h-6 w-6
+                                p-4
+                                md:h-9
+                                md:w-9
+                                flex relative overflow-hidden rounded-full `}
+                        >
+                          <Image
+                            src={`https://ipfs.io/ipfs/${postModalData?.userProfileImgHash}`}
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded-full"
+                            alt="Profile picture"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <p>
+                          <strong>{postModalData?.userName}</strong> shared a post
+                        </p>
+                        <p className="text-gray-400">{postModalData?.timeStamp}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p>
-                        <strong>{postModalData?.userName}</strong> shared a post
-                      </p>
-                      <p className="text-gray-400">
-                        {postModalData?.timeStamp}
-                      </p>
+                    <div className="text-gray-400">
+                      <DotsThree size={24} className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300" />
                     </div>
                   </div>
-                  <div className="text-gray-400">
-                    <p>...</p>
-                  </div>
-                </div>
                 {/* title of post*/}
-                <div className="text-gray-200">
+                <div className="text-gray-200 font-sans">
                   <p>{postModalData?.postDescription}</p>
                 </div>
                 {/* Post Image */}
@@ -438,7 +445,7 @@ export const Feed = ({ isUserProfile }) => {
                   </div>
                 )}
                 {/* Like - comment - share */}
-                <div className=" px-2 relative flex gap-x-6 text-white">
+                <div className=" px-2 relative flex gap-x-6 text-white font-sans">
                   {celebrateLikePostModal?.isPostLiked &&
                     celebrateLikePostModal?.postId ===
                       postModalData?.postId && (
@@ -487,7 +494,7 @@ export const Feed = ({ isUserProfile }) => {
                     className="
                   w-full px-2 py-3 rounded-md 
                   bg-darkBlue text-white
-                  focus:outline-none
+                  focus:outline-none font-sans
                   "
                     value={commentInputFieldValue}
                     onChange={(e) => setCommentInputFieldValue(e.target.value)}
@@ -510,24 +517,32 @@ export const Feed = ({ isUserProfile }) => {
                         className="flex gap-x-2 items-center pr-6"
                         key={comment?.commentId}
                       >
-                        <div>
-                          <Image
-                            src={`https://ipfs.io/ipfs/${comment?.author?.imageHash}`}
-                            className="rounded-full"
-                            width={32}
-                            height={32}
-                          />
-                        </div>
+                           <div
+                            className={`
+                            mb-3
+                                h-8 w-8
+                                md:h-10
+                                md:w-10
+                                flex relative overflow-hidden rounded-full `}
+                          >
+                            <Image
+                              src={`https://ipfs.io/ipfs/${comment?.author?.imageHash}`}
+                              layout="fill"
+                              objectFit="cover"
+                              className="rounded-full"
+                              alt="Profile picture"
+                            />
+                          </div>
                         <div className="text-gray-300   ">
                           <div className="bg-darkBlue p-2 rounded-lg">
                             {" "}
                             <p className="text-md">
                               {comment?.author?.userName}
                             </p>
-                            <p className="text-sm">{comment?.content}</p>
+                            <p className="text-sm font-sans">{comment?.content}</p>
                           </div>
 
-                          <div className="flex text-gray-400">
+                          <div className="flex text-gray-400 font-sans text-xs">
                             <div className="flex gap-x-4">
                               <p>Like</p>
                               <p>Report</p>
@@ -566,7 +581,7 @@ export const Feed = ({ isUserProfile }) => {
             <div className="relative flex justify-between items-center text-white">
               <h1 className="text-gray-500 uppercase font-mono">About me</h1>
               <div className="text-gray-400">
-                <DotsThree size={24} />
+                <DotsThree size={24} className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300" />
               </div>
             </div>
             <div className="text-gray-300 relative p-2 font-sans">
@@ -751,7 +766,7 @@ export const Feed = ({ isUserProfile }) => {
                       </div>
                     </div>
                     <div className="text-gray-400">
-                      <DotsThree size={24} />
+                      <DotsThree size={24} className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300" />
                     </div>
                   </div>
                   {/* title of post*/}
@@ -919,7 +934,7 @@ export const Feed = ({ isUserProfile }) => {
                       </div>
                     </div>
                     <div className="text-gray-400">
-                      <DotsThree size={24} />
+                      <DotsThree size={24} className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300" />
                     </div>
                   </div>
                   {/* title of post*/}
