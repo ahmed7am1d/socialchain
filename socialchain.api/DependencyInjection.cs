@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using socialchain.infrastructure.DbContexts;
 
 namespace socialchain.api
 {
@@ -16,6 +18,12 @@ namespace socialchain.api
             }));
             builder.Services.AddControllers();
             builder.Services.AddSingleton<ProblemDetailsFactory, SocialChainProblemDetailsFactory>();
+            //DbContext
+            services.AddDbContext<DataContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("SocialChainDB"),
+                    x => x.MigrationsAssembly("socialchain.infrastructure"));
+            });
             return services;
         }
     }

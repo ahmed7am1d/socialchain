@@ -121,7 +121,7 @@ module.exports = {
     // Ganache local blockchain
     localGanache: {
       url:'HTTP://127.0.0.1:7545',
-      account:"0x944618d4a045e877c0727ad49d26cb369e7f5de91c5ab0a3f0d3674f9652a62e"
+      account:"0x641efb151b09909197dc33110d3bed8c63831095a859dac338120479f0b2ab05"
     }
   },
 };
