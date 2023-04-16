@@ -62,7 +62,7 @@ export const LeftSideBar = () => {
         <div className="mt-10">
           <p className=" text-gray-500 text-sm uppercase font-mono">Menu</p>
           <ul
-            className={`flex flex-col gap-y-5 mt-5 text-gray-300 text-md font-Arimo-navbar-font ${styles.homePageLeftNavigationWrapper}`}
+            className={`flex flex-col gap-y-5 mt-5 text-gray-300 text-sm font-sans ${styles.homePageLeftNavigationWrapper}`}
           >
             <Link href="/home">
               <li className="flex items-center gap-x-5">
@@ -95,7 +95,7 @@ export const LeftSideBar = () => {
         <div>
           <p className=" text-gray-500 text-sm uppercase font-mono">Others</p>
           <ul
-            className={`flex flex-col gap-y-5 mt-5 text-gray-300 text-md font-Arimo-navbar-font   ${styles.homePageLeftNavigationWrapper}`}
+            className={`flex flex-col gap-y-5 mt-5 text-gray-300 text-sm font-sans  ${styles.homePageLeftNavigationWrapper}`}
           >
             <li className="flex items-center gap-x-5">
               <SettingOutlined />
