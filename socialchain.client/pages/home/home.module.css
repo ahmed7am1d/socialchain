@@ -12,6 +12,10 @@
   transition: 0.3s;
 }
 
+.homePageLeftNavigationWrapperActive {
+  background-color: #9f7501;
+}
+
 /* Media queris for the left side bar navigations */
 @media only screen and (max-width: 900px) {
   .homePageLeftNavigationWrapper li span:nth-child(2) {

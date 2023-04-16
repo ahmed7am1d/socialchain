@@ -19,6 +19,8 @@ import { useRouter } from "next/router";
 export const LeftSideBar = () => {
   const { auth, setAuth } = useAuth();
   const router = useRouter();
+  const currentRoute = router.pathname;
+
   const handleLogOut = async () => {
     //[1]- Remove the cookies
     await logOut();
@@ -65,27 +67,27 @@ export const LeftSideBar = () => {
             className={`flex flex-col gap-y-5 mt-5 text-gray-300 text-sm font-sans ${styles.homePageLeftNavigationWrapper}`}
           >
             <Link href="/home">
-              <li className="flex items-center gap-x-5">
+              <li className={`flex items-center gap-x-5 ${currentRoute === "/home" && styles.homePageLeftNavigationWrapperActive}`}>
                 <HomeOutlined />
                 <span>Home</span>
               </li>
             </Link>
             <Link href="/home/profile">
-              <li className="flex items-center gap-x-5">
+              <li className={`flex items-center gap-x-5 ${currentRoute === "/home/profile" && styles.homePageLeftNavigationWrapperActive}`}>
                 <UserOutlined />
                 <span>My profile</span>
               </li>
             </Link>
-            <li className="flex items-center gap-x-5">
+            <li className={`flex items-center gap-x-5 ${currentRoute === "/home/cryptonews" && styles.homePageLeftNavigationWrapperActive}`}>
               <NotificationOutlined />
               <span>Latest crypto news</span>
             </li>
-            <li className="flex items-center gap-x-5">
+            {/* <li className="flex items-center gap-x-5">
               <EnvironmentOutlined />
               <span>Explore</span>
-            </li>
+            </li> */}
 
-            <li className="flex items-center gap-x-5">
+            <li className={`flex items-center gap-x-5 ${currentRoute === "/home/events" && styles.homePageLeftNavigationWrapperActive}`}>
               <CalendarOutlined />
               <span>Events</span>
             </li>
@@ -97,7 +99,7 @@ export const LeftSideBar = () => {
           <ul
             className={`flex flex-col gap-y-5 mt-5 text-gray-300 text-sm font-sans  ${styles.homePageLeftNavigationWrapper}`}
           >
-            <li className="flex items-center gap-x-5">
+            <li className={`flex items-center gap-x-5 ${currentRoute === "/home/settings" && styles.homePageLeftNavigationWrapperActive}`}>
               <SettingOutlined />
               <span>Settings</span>
             </li>
