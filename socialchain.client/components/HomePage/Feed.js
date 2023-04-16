@@ -2,10 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import useAuth from "@/hooks/useAuth";
 import useIPFS from "@/hooks/useIPFS";
 import fileToBase64 from "@/utils/Files/fileUtils";
-import peopleIcon from "../../assets/Icons/people.png";
-import checkInIcon from "../../assets/Icons/check-in.png";
-import moodIcon from "../../assets/Icons/moode.png";
-import { Upload } from "phosphor-react";
+import {
+  Upload,
+  Users,
+  NavigationArrow,
+  MaskHappy,
+  DotsThree,
+} from "phosphor-react";
 import blockChainEvent from "../../assets/Images/blockChainEvent.png";
 import {
   HeartFilled,
@@ -395,31 +398,38 @@ export const Feed = ({ isUserProfile }) => {
               >
                 {/* Created by */}
                 <div className="flex justify-between font-sans">
-                  <div className="flex items-center gap-x-5 text-white">
-                    <div>
-                      <Image
-                        src={`https://ipfs.io/ipfs/${postModalData?.userProfileImgHash}`}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                        alt="Profile picture"
-                      />
+                    <div className="flex items-center gap-x-5 text-white rounded-full">
+                      <div>
+                        <div
+                          className={`
+                                h-6 w-6
+                                p-4
+                                md:h-9
+                                md:w-9
+                                flex relative overflow-hidden rounded-full `}
+                        >
+                          <Image
+                            src={`https://ipfs.io/ipfs/${postModalData?.userProfileImgHash}`}
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded-full"
+                            alt="Profile picture"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <p>
+                          <strong>{postModalData?.userName}</strong> shared a post
+                        </p>
+                        <p className="text-gray-400">{postModalData?.timeStamp}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p>
-                        <strong>{postModalData?.userName}</strong> shared a post
-                      </p>
-                      <p className="text-gray-400">
-                        {postModalData?.timeStamp}
-                      </p>
+                    <div className="text-gray-400">
+                      <DotsThree size={24} className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300" />
                     </div>
                   </div>
-                  <div className="text-gray-400">
-                    <p>...</p>
-                  </div>
-                </div>
                 {/* title of post*/}
-                <div className="text-gray-200">
+                <div className="text-gray-200 font-sans">
                   <p>{postModalData?.postDescription}</p>
                 </div>
                 {/* Post Image */}
@@ -435,7 +445,7 @@ export const Feed = ({ isUserProfile }) => {
                   </div>
                 )}
                 {/* Like - comment - share */}
-                <div className=" px-2 relative flex gap-x-6 text-white">
+                <div className=" px-2 relative flex gap-x-6 text-white font-sans">
                   {celebrateLikePostModal?.isPostLiked &&
                     celebrateLikePostModal?.postId ===
                       postModalData?.postId && (
@@ -484,7 +494,7 @@ export const Feed = ({ isUserProfile }) => {
                     className="
                   w-full px-2 py-3 rounded-md 
                   bg-darkBlue text-white
-                  focus:outline-none
+                  focus:outline-none font-sans
                   "
                     value={commentInputFieldValue}
                     onChange={(e) => setCommentInputFieldValue(e.target.value)}
@@ -507,24 +517,32 @@ export const Feed = ({ isUserProfile }) => {
                         className="flex gap-x-2 items-center pr-6"
                         key={comment?.commentId}
                       >
-                        <div>
-                          <Image
-                            src={`https://ipfs.io/ipfs/${comment?.author?.imageHash}`}
-                            className="rounded-full"
-                            width={32}
-                            height={32}
-                          />
-                        </div>
+                           <div
+                            className={`
+                            mb-3
+                                h-8 w-8
+                                md:h-10
+                                md:w-10
+                                flex relative overflow-hidden rounded-full `}
+                          >
+                            <Image
+                              src={`https://ipfs.io/ipfs/${comment?.author?.imageHash}`}
+                              layout="fill"
+                              objectFit="cover"
+                              className="rounded-full"
+                              alt="Profile picture"
+                            />
+                          </div>
                         <div className="text-gray-300   ">
                           <div className="bg-darkBlue p-2 rounded-lg">
                             {" "}
                             <p className="text-md">
                               {comment?.author?.userName}
                             </p>
-                            <p className="text-sm">{comment?.content}</p>
+                            <p className="text-sm font-sans">{comment?.content}</p>
                           </div>
 
-                          <div className="flex text-gray-400">
+                          <div className="flex text-gray-400 font-sans text-xs">
                             <div className="flex gap-x-4">
                               <p>Like</p>
                               <p>Report</p>
@@ -535,14 +553,15 @@ export const Feed = ({ isUserProfile }) => {
                       </div>
                     ))}
                   </div>
-                  {postModalPagination !== 0 && postModalData?.comment?.length >= 3 && (
-                    <p
-                      className="text-white mt-5 hover:underline hover:cursor-pointer"
-                      onClick={() => handleShowMorePostModal()}
-                    >
-                      Show more comments
-                    </p>
-                  )}
+                  {postModalPagination !== 0 &&
+                    postModalData?.comment?.length >= 3 && (
+                      <p
+                        className="text-white mt-5 hover:underline hover:cursor-pointer"
+                        onClick={() => handleShowMorePostModal()}
+                      >
+                        Show more comments
+                      </p>
+                    )}
                 </div>
               </div>
             </div>
@@ -557,13 +576,15 @@ export const Feed = ({ isUserProfile }) => {
       >
         <aside className="hidden lg:flex lg:flex-col lg:gap-y-8 text-sm">
           {/* About me */}
-          <div className="p-3 relative font-sans">
+          <div className="p-3 relative">
             <div className="absolute inset-0 rounded-md bg-darkBlue opacity-40"></div>
             <div className="relative flex justify-between items-center text-white">
               <h1 className="text-gray-500 uppercase font-mono">About me</h1>
-              <div>...</div>
+              <div className="text-gray-400">
+                <DotsThree size={24} className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300" />
+              </div>
             </div>
-            <div className="text-gray-300 relative p-2">
+            <div className="text-gray-300 relative p-2 font-sans">
               <p className="text-sm">{auth.bio}</p>
             </div>
           </div>
@@ -575,8 +596,8 @@ export const Feed = ({ isUserProfile }) => {
                 <Image src={blockChainEvent} alt="Event image" />
               </div>
             </div>
-            <div className="relative p-3">
-              <p className="text-white font-sans">Winter blockchain event</p>
+            <div className="relative p-3 font-sans">
+              <p className="text-white">Winter blockchain event</p>
               <p className="text-gray-500">01st Jan, 2024 07:00AM</p>
             </div>
           </div>
@@ -593,16 +614,8 @@ export const Feed = ({ isUserProfile }) => {
               postDescription: "",
             }}
           >
-            {/* Type of post */}
-            {/* <div className="gap-y-5 flex flex-col"> */}
-            {/* <ul className="flex gap-x-5 text-gray-300"> */}
-            {/* <li>Status</li> */}
-            {/* <li className="cursor-pointer">Upload Photo</li> */}
-            {/* <li>Videos</li> */}
-            {/* </ul> */}
-            {/* </div> */}
-            {/* placeholder and input text */}
             <div className="flex items-start gap-x-5 mt-2">
+              {/* User image + post title */}
               <div
                 className={`
             h-8 w-8
@@ -686,37 +699,22 @@ export const Feed = ({ isUserProfile }) => {
               />
             </Form.Item>
             {/* button - type and additional feelings */}
-            <div className="flex items-center justify-between w-full text-gray-400 font-sans">
+            <div className="flex items-center justify-between w-full text-gray-400">
               <div className="flex flex-row w-full gap-x-7">
-                <div className="flex gap-x-2">
-                  <Image
-                    src={peopleIcon}
-                    height={20}
-                    width={22}
-                    alt="People icon"
-                  />
+                <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
+                  <Users size={23} />
                   <p className="hidden sm:block md:block lg:block">
-                    Tag Friend
+                    Tag a friend
                   </p>
                 </div>
-                <div className="flex gap-x-2">
-                  <Image
-                    src={checkInIcon}
-                    height={20}
-                    width={22}
-                    alt="Location icon"
-                  />
+                <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
+                  <NavigationArrow size={23} />
                   <p className="hidden sm:block md:block lg:block">
-                    Share Location
+                    Share a location
                   </p>
                 </div>
-                <div className="flex gap-x-2">
-                  <Image
-                    src={moodIcon}
-                    height={20}
-                    width={22}
-                    alt="Mood icon"
-                  />
+                <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
+                  <MaskHappy size={23} />
                   <p className="hidden sm:block md:block lg:block">Mood</p>
                 </div>
               </div>
@@ -768,11 +766,11 @@ export const Feed = ({ isUserProfile }) => {
                       </div>
                     </div>
                     <div className="text-gray-400">
-                      <p>...</p>
+                      <DotsThree size={24} className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300" />
                     </div>
                   </div>
                   {/* title of post*/}
-                  <div className="text-gray-200">
+                  <div className="text-gray-200 font-sans">
                     <p>{post?.postDescription}</p>
                   </div>
                   {/* Image */}
@@ -788,7 +786,7 @@ export const Feed = ({ isUserProfile }) => {
                   )}
 
                   {/* Likes - comments - share */}
-                  <div className=" px-2 relative flex gap-x-6 text-white">
+                  <div className=" px-2 relative flex gap-x-6 text-white font-sans">
                     {celebrateLikePost?.isPostLiked &&
                       celebrateLikePost?.postId === post?.postId && (
                         <ConfettiExplosion
@@ -818,7 +816,9 @@ export const Feed = ({ isUserProfile }) => {
                     </div>
                     <div className="flex items-center justify-center gap-x-2">
                       <CommentOutlined />
-                      <span>{post?.comments?.length ? post?.comments?.length : "0" }</span>
+                      <span>
+                        {post?.comments?.length ? post?.comments?.length : "0"}
+                      </span>
                     </div>
                     <div className="flex items-center justify-center gap-x-2">
                       <ShareAltOutlined />
@@ -826,11 +826,11 @@ export const Feed = ({ isUserProfile }) => {
                     </div>
                   </div>
                   {/* Comment input field */}
-                  <div className="relative">
+                  <div className="relative font-sans">
                     <input
                       placeholder="Write a comment..."
                       className="
-                  w-full px-2 py-3 rounded-md 
+                  w-full px-2 py-3 rounded-md
                   bg-darkBlue text-white
                   focus:outline-none
                   "
@@ -852,7 +852,7 @@ export const Feed = ({ isUserProfile }) => {
                     >
                       {post?.comments?.map((comment) => (
                         <div
-                          className="flex gap-x-2 items-center"
+                          className="flex gap-x-2 items-center pr-6 font-sans"
                           key={comment?.commentId}
                         >
                           <div
@@ -881,7 +881,7 @@ export const Feed = ({ isUserProfile }) => {
                             </div>
 
                             <div className="flex text-gray-400">
-                              <div className="flex gap-x-4">
+                              <div className="flex gap-x-4 text-xs">
                                 <p>Like</p>
                                 <p>Report</p>
                                 <p>{comment?.timeStamp}</p>
@@ -934,11 +934,11 @@ export const Feed = ({ isUserProfile }) => {
                       </div>
                     </div>
                     <div className="text-gray-400">
-                      <p>...</p>
+                      <DotsThree size={24} className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300" />
                     </div>
                   </div>
                   {/* title of post*/}
-                  <div className="text-gray-200">
+                  <div className="text-gray-200 font-sans">
                     <p>{post?.postDescription}</p>
                   </div>
 
@@ -955,7 +955,7 @@ export const Feed = ({ isUserProfile }) => {
                   )}
 
                   {/* Likes - comments - share */}
-                  <div className=" px-2 relative flex gap-x-6 text-white">
+                  <div className=" px-2 relative flex gap-x-6 text-white font-sans">
                     {celebrateLikePost?.isPostLiked &&
                       celebrateLikePost?.postId === post?.postId && (
                         <ConfettiExplosion
@@ -985,7 +985,9 @@ export const Feed = ({ isUserProfile }) => {
                     </div>
                     <div className="flex items-center justify-center gap-x-2">
                       <CommentOutlined />
-                      <span>{post?.comments?.length ? post?.comments?.length : "0" }</span>
+                      <span>
+                        {post?.comments?.length ? post?.comments?.length : "0"}
+                      </span>
                     </div>
                     <div className="flex items-center justify-center gap-x-2">
                       <ShareAltOutlined />
@@ -993,7 +995,7 @@ export const Feed = ({ isUserProfile }) => {
                     </div>
                   </div>
                   {/* Comment input field */}
-                  <div className="relative">
+                  <div className="relative font-sans">
                     <input
                       placeholder="Write a comment..."
                       className="
@@ -1019,7 +1021,7 @@ export const Feed = ({ isUserProfile }) => {
                     >
                       {post?.comments?.map((comment) => (
                         <div
-                          className="flex gap-x-2 items-center pr-6"
+                          className="flex gap-x-2 items-center pr-6 font-sans"
                           key={comment?.commentId}
                         >
                           <div
@@ -1049,7 +1051,7 @@ export const Feed = ({ isUserProfile }) => {
                             </div>
 
                             <div className="flex text-gray-400">
-                              <div className="flex gap-x-4">
+                              <div className="flex gap-x-4 text-xs">
                                 <p>Like</p>
                                 <p>Report</p>
                                 <p>{comment?.timeStamp}</p>
