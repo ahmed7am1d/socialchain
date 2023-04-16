@@ -775,7 +775,7 @@ export const Feed = ({ isUserProfile }) => {
                   </div>
                   {/* Image */}
                   {post?.postImgHash && (
-                    <div className="flex relative w-full h-[300px]">
+                    <div className="flex relative w-full h-[300px] hover:cursor-pointer" onClick={() => handlePostModalOpen(post)}>
                       <Image
                         layout="fill"
                         objectFit="contain"
@@ -944,7 +944,7 @@ export const Feed = ({ isUserProfile }) => {
 
                   {/* Image */}
                   {post?.postImgHash && (
-                    <div className="flex relative w-full h-[300px]">
+                    <div className="flex relative w-full h-[300px] hover:cursor-pointer" onClick={() => handlePostModalOpen(post)}>
                       <Image
                         layout="fill"
                         objectFit="contain"
