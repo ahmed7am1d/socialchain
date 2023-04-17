@@ -302,7 +302,7 @@ const login = () => {
         } catch (e) {
           messageApi.open({
             type: "error",
-            content: "You have to sign the message to register to get JWT !!",
+            content: "You have to sign the message to make sure you are a verified user !!",
           });
           return false;
         }

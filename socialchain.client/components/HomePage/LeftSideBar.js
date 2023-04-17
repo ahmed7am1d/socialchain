@@ -16,18 +16,22 @@ import Image from "next/image";
 import useAuth from "@/hooks/useAuth";
 import { logOut } from "@/services/api/authService";
 import { useRouter } from "next/router";
+import useLogoutLoading from "@/hooks/useLogoutLoading";
 export const LeftSideBar = () => {
   const { auth, setAuth } = useAuth();
+  const {isLogoutLoading, setIsLogoutLoading} = useLogoutLoading();
   const router = useRouter();
   const currentRoute = router.pathname;
 
   const handleLogOut = async () => {
+    setIsLogoutLoading(true);
     //[1]- Remove the cookies
     await logOut();
     //[2]- Clear the state
     setAuth({});
     //[3]- Forward to login
     router.push("/login");
+    setIsLogoutLoading(false);
   };
   return (
     <aside className={`p-5 bg-darkBlueHalfTrans  ${styles.asideWrapper}`}>
