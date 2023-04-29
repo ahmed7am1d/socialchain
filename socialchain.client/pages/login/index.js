@@ -21,7 +21,7 @@ import {
   kava,
   osmosis,
   uploadImage,
-} from "./imports";
+} from "../../imports/loginImports.js";
 
 import Image from "next/image";
 import classes from "./login.module.css";
@@ -47,7 +47,7 @@ import { LottieAnimation } from "@/components/Animations/LottieAnimation";
  */
 export async function getServerSideProps(context) {
   try {
-    const cookies = cookie.parse(context.req.headers.cookie);
+    const cookies = cookie.parse(context.req.headers.cookie || ''); // Use an empty string if there is no cookie header
     const accessToken = cookies?.accessToken;
     if (accessToken) {
       if (await isValidJWT(accessToken)) {
@@ -69,6 +69,7 @@ export async function getServerSideProps(context) {
       };
     }
   } catch (e) {
+    console.error(e); // Log the error for debugging purposes
     return {
       props: {},
     };
