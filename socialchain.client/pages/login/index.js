@@ -683,6 +683,8 @@ const login = () => {
                   fileName="blockchainPerformanceAnimation.json"
                   width={200}
                   divId="blockchainPerformanceAnimation"
+                  animationTitle="Performance"
+                  animationDescription="Performance animation"
                 />
               </div>
               <h1 className="text-2xl font-semibold text-white">Performance</h1>
@@ -718,6 +720,8 @@ const login = () => {
                   fileName="106808-blockchain.json"
                   width={200}
                   divId="106808-blockchain"
+                  animationTitle="Blockchain"
+                  animationDescription="Blockchain animation"
                 />
               </div>
               <h1 className="text-2xl font-semibold text-white">
