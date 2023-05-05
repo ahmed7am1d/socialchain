@@ -354,7 +354,7 @@ export const Feed = ({ isUserProfile }) => {
     <>
       {contextHolder}
       {isloadingBlockChainData ? (
-        <div>Loading...</div>
+        <div className="bg-red-400">Loading...</div>
       ) : (
         <div>
           {/* Modal - FirstDiv [to overlay all page content] middle of page */}
