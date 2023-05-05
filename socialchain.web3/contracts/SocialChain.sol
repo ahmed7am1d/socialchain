@@ -5,7 +5,7 @@ pragma solidity ^0.8.18;
 import "hardhat/console.sol";
 
 contract SocialChain {
-    address payable public owner; //Owner is also a maintainer
+    address payable public owner; 
     uint public totalUsers = 0;
     uint public totalPosts = 0;
     uint public totalComments = 0;
@@ -33,7 +33,6 @@ contract SocialChain {
         uint postId;
         address author;
         string postDescription;
-        //ipfs location for the image
         string imgHash;
         uint timeStamp;
         uint likeCount;
@@ -52,32 +51,24 @@ contract SocialChain {
         commentStatus status;
     }
 
-    //mapping to get user details from user address
     mapping(address => User) private users;
-    //mapping to get user ad    dress from userName
     mapping(string => address) private userAddressFromUserName;
-    //mapping to check which username is taken
     mapping(string => bool) private usernames;
 
-    //mapping to get a post by post Id
     mapping(uint => Post) private posts;
-    //mapping or list to store all postsId that is done by specific user (user address)
     mapping(address => uint[]) private userPosts;
-    //mapping to track who like which post
     mapping(uint => mapping(address => bool)) private postLikers;
 
-    //mapping to get comment by comment id
-    mapping(uint => Comment) private comments;
-    //mapping to get all user comments [comment's ids] from account address
-    mapping(address => uint[]) userComments;
-    //mapping to get all comments for specific post
-    mapping(uint => uint[]) private postComments;
 
+    mapping(uint => Comment) private comments;
+    mapping(address => uint[]) userComments;
+    mapping(uint => uint[]) private postComments;
+    
     event logRegisterUser(address userAddress, uint userId);
     event logPostCreated(address _author, uint _userId, uint _postId);
     event logCommentCreated(address _author,uint _commentId,uint _postId, uint _likeCount, uint _reportCount, uint _timeStamp, string _content);
+
     enum accountStatus {
-        //NP Stand for = Not present
         NP,
         Active,
         Banned,
@@ -132,9 +123,8 @@ contract SocialChain {
         _;
     }
 
-    /*
-     ###########################################USER FUNCTIONS###########################################
-     */
+    //#region Users function
+
     function userNameAvailable(
         string memory _username
     ) public view returns (bool status) {
@@ -210,10 +200,11 @@ contract SocialChain {
         );
     }
 
-    /*
-     ###########################################POST FUNCTIONS###########################################
-     */
-    
+    //#endregion
+
+
+    //#region Post function
+
     //--------ATTENTIONS:
     //-- THIS FUNCTION NEED TO BE MODIFIED SO THAT ONLY ALLOWED USERS CAN POST
     //-- The function should create the post by only the message sender address not by sending the address
@@ -315,9 +306,11 @@ contract SocialChain {
         return postLikers[_postId][_userAddress];
     }
 
-    /*
-     ###########################################COMMENT FUNCTIONS###########################################
-     */
+    //#endregion
+
+
+    //#region Comment functions
+
     function createComment(
         uint _postId,
         string memory _comment
@@ -386,4 +379,5 @@ contract SocialChain {
         return commentsResponse;
     }
 
+    //#endregion
 }

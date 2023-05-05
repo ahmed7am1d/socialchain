@@ -52,8 +52,9 @@ export const Feed = ({ isUserProfile }) => {
   const [celebrateLikePost, setCelebrateLikePost] = useState({});
   const [celebrateLikePostModal, setCelebrateLikePostModal] = useState({});
   const [commentInputFieldValue, setCommentInputFieldValue] = useState("");
-  let [postModalPagination, setPostModalPagination] = useState(3);
   const [isloadingBlockChainData, setIsloadingBlockChainData] = useState(true);
+  let [postModalPagination, setPostModalPagination] = useState();
+
   //#endregion
 
   //#region handling
@@ -259,6 +260,7 @@ export const Feed = ({ isUserProfile }) => {
   };
 
   const handlePostModalOpen = async (post) => {
+    setPostModalPagination(1);
     if (post) {
       setPostModalData(post);
     }
@@ -266,38 +268,43 @@ export const Feed = ({ isUserProfile }) => {
   };
   const handlePostModalClose = async () => {
     setIsModalOpen(false);
-    setPostModalPagination(0);
+    setPostModalPagination(1);
   };
 
   const handleShowMorePostModal = async () => {
     //[1]- Make sure the comments for the post is more than 2
     if (postModalData?.comments.length > 2) {
       if (postModalPagination !== 0) {
-        setPostModalPagination(postModalPagination + 1);
-        const comments = await getPostComments(
-          postModalData?.postId,
-          postModalPagination,
-          1
-        );
-        console.log("Result from the contract => ", comments);
+        try {
+          setPostModalPagination(postModalPagination + 1);
+          const comments = await getPostComments(
+            postModalPagination,
+            2,
+            postModalData?.postId
+          );
+          console.log("Result from the contract => ", comments);
 
-        //[4]- insert the comments to the modal
-        setPostModalData((prev) => {
-          // If the new comments have already been saved, don't update the state
-          const existingCommentIds = prev.comments.map(
-            (comment) => comment.commentId
-          );
-          const newComments = comments.filter(
-            (comment) => !existingCommentIds.includes(comment.commentId)
-          );
-          if (newComments.length === 0) {
-            setPostModalPagination(0);
-            return prev;
-          }
-          // Otherwise, add the new comments to the state
-          const allComments = [...prev.comments, ...newComments];
-          return { ...prev, comments: allComments };
-        });
+          //[4]- insert the comments to the modal
+          setPostModalData((prev) => {
+            // If the new comments have already been saved, don't update the state
+            const existingCommentIds = prev.comments.map(
+              (comment) => comment.commentId
+            );
+            const newComments = comments.filter(
+              (comment) => !existingCommentIds.includes(comment.commentId)
+            );
+            if (newComments.length === 0) {
+              setPostModalPagination(0);
+              return prev;
+            }
+            // Otherwise, add the new comments to the state
+            const allComments = [...prev.comments, ...newComments];
+            return { ...prev, comments: allComments };
+          });
+        } catch (error)
+        {
+          console.log('Error from contract => ', error);
+        }
       }
     }
   };
@@ -335,6 +342,7 @@ export const Feed = ({ isUserProfile }) => {
 
   //#region loading of data
   useEffect(() => {
+    setPostModalPagination(1);
     async function loadPosts() {
       if (isUserProfile) {
         const userPostsTemp = await getUserPosts();
@@ -404,42 +412,47 @@ export const Feed = ({ isUserProfile }) => {
                   >
                     {/* Created by */}
                     <div className="flex justify-between font-sans">
-                      <div className="flex items-center gap-x-5 text-white rounded-full">
-                        <div>
-                          <div
-                            className={`
+                    <div className="flex items-center gap-x-5 text-white rounded-full">
+                      <div>
+                        <div
+                          className={`
                                 h-6 w-6
                                 p-4
                                 md:h-9
                                 md:w-9
                                 flex relative overflow-hidden rounded-full `}
-                          >
-                            <Image
-                              src={`https://ipfs.io/ipfs/${postModalData?.userProfileImgHash}`}
-                              layout="fill"
-                              objectFit="cover"
-                              className="rounded-full"
-                              alt="Profile picture"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <p>
-                            <strong>{postModalData?.userName}</strong> shared a
-                            post
-                          </p>
-                          <p className="text-gray-400">
-                            {postModalData?.timeStamp}
-                          </p>
+                        >
+                          <Image
+                            src={`https://ipfs.io/ipfs/${postModalData?.userProfileImgHash}`}
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded-full"
+                            alt="Profile picture"
+                          />
                         </div>
                       </div>
-                      <div className="text-gray-400">
-                        <DotsThree
-                          size={24}
-                          className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300"
-                        />
+                      <div>
+                        <p>
+                          <strong>{postModalData?.userName}</strong> shared a
+                            post
+                        </p>
+                        <p className="text-gray-400">
+                            
+                        {postModalData?.timeStamp}
+                          
+                      </p>
                       </div>
                     </div>
+                    <div className="text-gray-400">
+                      <DotsThree
+                         
+                      size={24}
+                         
+                      className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300"
+                       
+                    />
+                    </div>
+                  </div>
                     {/* title of post*/}
                     <div className="text-gray-200 font-sans">
                       <p>{postModalData?.postDescription}</p>
@@ -531,22 +544,22 @@ export const Feed = ({ isUserProfile }) => {
                             className="flex gap-x-2 items-center pr-6"
                             key={comment?.commentId}
                           >
-                            <div
-                              className={`
+                         <div
+                            className={`
                             mb-3
                                 h-8 w-8
                                 md:h-10
                                 md:w-10
                                 flex relative overflow-hidden rounded-full `}
-                            >
-                              <Image
-                                src={`https://ipfs.io/ipfs/${comment?.author?.imageHash}`}
-                                layout="fill"
-                                objectFit="cover"
-                                className="rounded-full"
-                                alt="Profile picture"
-                              />
-                            </div>
+                          >
+                            <Image
+                              src={`https://ipfs.io/ipfs/${comment?.author?.imageHash}`}
+                              layout="fill"
+                              objectFit="cover"
+                              className="rounded-full"
+                              alt="Profile picture"
+                            />
+                          </div>
                             <div className="text-gray-300   ">
                               <div className="bg-darkBlue p-2 rounded-lg">
                                 {" "}
@@ -554,8 +567,10 @@ export const Feed = ({ isUserProfile }) => {
                                   {comment?.author?.userName}
                                 </p>
                                 <p className="text-sm font-sans">
-                                  {comment?.content}
-                                </p>
+                                  
+                              {comment?.content}
+                                
+                            </p>
                               </div>
 
                               <div className="flex text-gray-400 font-sans text-xs">
@@ -570,7 +585,7 @@ export const Feed = ({ isUserProfile }) => {
                         ))}
                       </div>
                       {postModalPagination !== 0 &&
-                        postModalData?.comment?.length >= 3 && (
+                        postModalData?.comments?.length >= 3 && (
                           <p
                             className="text-white mt-5 hover:underline hover:cursor-pointer"
                             onClick={() => handleShowMorePostModal()}
@@ -600,9 +615,12 @@ export const Feed = ({ isUserProfile }) => {
                   </h1>
                   <div className="text-gray-400">
                     <DotsThree
-                      size={24}
-                      className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300"
-                    />
+                     
+                  size={24}
+                     
+                  className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300"
+                   
+                />
                   </div>
                 </div>
                 <div className="text-gray-300 relative p-2 font-sans">
@@ -788,9 +806,12 @@ export const Feed = ({ isUserProfile }) => {
                         </div>
                         <div className="text-gray-400">
                           <DotsThree
-                            size={24}
-                            className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300"
-                          />
+                           
+                        size={24}
+                           
+                        className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300"
+                         
+                      />
                         </div>
                       </div>
                       {/* title of post*/}
@@ -966,9 +987,12 @@ export const Feed = ({ isUserProfile }) => {
                         </div>
                         <div className="text-gray-400">
                           <DotsThree
-                            size={24}
-                            className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300"
-                          />
+                           
+                        size={24}
+                           
+                        className="hover:bg-gray-400 hover:bg-opacity-10 rounded-md hover:cursor-pointer transition-all duration-300"
+                         
+                      />
                         </div>
                       </div>
                       {/* title of post*/}
