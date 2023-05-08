@@ -47,7 +47,7 @@ import { LottieAnimation } from "@/components/Animations/LottieAnimation";
  */
 export async function getServerSideProps(context) {
   try {
-    const cookies = cookie.parse(context.req.headers.cookie || ''); // Use an empty string if there is no cookie header
+    const cookies = cookie.parse(context.req.headers.cookie || ""); // Use an empty string if there is no cookie header
     const accessToken = cookies?.accessToken;
     if (accessToken) {
       if (await isValidJWT(accessToken)) {
@@ -137,8 +137,7 @@ const login = () => {
           } catch (error) {
             messageApi.open({
               type: "error",
-              content:
-                "Failed to upload image to IPFS !!",
+              content: "Failed to upload image to IPFS !!",
             });
           }
         }
@@ -209,7 +208,8 @@ const login = () => {
         } catch (e) {
           messageApi.open({
             type: "error",
-            content: "You have to sign the message to be able to access the website pages!!",
+            content:
+              "You have to sign the message to be able to access the website pages!!",
           });
           return false;
         }
@@ -217,8 +217,7 @@ const login = () => {
         console.log(e);
         messageApi.open({
           type: "error",
-          content:
-            "You have to connect your wallet to continue !!",
+          content: "You have to connect your wallet to continue !!",
         });
         return false;
       }
@@ -268,57 +267,66 @@ const login = () => {
     if (window.ethereum) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       //let the user connect to his account
-      //add try here:
-      const accountAddresses = await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const isRegisteredUserResult = await isRegisteredUser(
-        accountAddresses[0]
-      );
-      if (isRegisteredUserResult === true) {
-        //[A]- nonce
-        const messageTempToken = await nonce(accountAddresses[0]);
-        //[B]- get user signature
-        let signature = "";
-        try {
-          signature = await signer.signMessage(messageTempToken.message);
-          //[C]- verify and get accessToken
-          const accessTokenAndDataResult = await verify(
-            messageTempToken.tempToken,
-            signature
-          );
-          if (accessTokenAndDataResult?.status > 206) {
+      try {
+        const accountAddresses = await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+        const isRegisteredUserResult = await isRegisteredUser(
+          accountAddresses[0]
+        );
+        if (isRegisteredUserResult === true) {
+          //[A]- nonce
+          const messageTempToken = await nonce(accountAddresses[0]);
+          //[B]- get user signature
+          let signature = "";
+          try {
+            signature = await signer.signMessage(messageTempToken.message);
+            //[C]- verify and get accessToken
+            const accessTokenAndDataResult = await verify(
+              messageTempToken.tempToken,
+              signature
+            );
+            if (accessTokenAndDataResult?.status > 206) {
+              messageApi.open({
+                type: "error",
+                content: accessTokenAndDataResult?.data?.title,
+              });
+              return false;
+            }
+            //[5]- Forward the user to the login page with sending parameters
+            router.push(
+              {
+                pathname: "/home/profile",
+              },
+              "./home/profile"
+            );
+          } catch (e) {
             messageApi.open({
               type: "error",
-              content: accessTokenAndDataResult?.data?.title,
+              content:
+                "You have to sign the message to make sure you are a verified user !!",
             });
             return false;
           }
-          //[5]- Forward the user to the login page with sending parameters
-          router.push(
-            {
-              pathname: "/home/profile",
-            },
-            "./home/profile"
-          );
-        } catch (e) {
+        } else {
           messageApi.open({
             type: "error",
-            content: "You have to sign the message to make sure you are a verified user !!",
+            content: isRegisteredUserResult,
           });
           return false;
         }
-      } else {
+      } catch (err) {
+        //User reject to connect his account
         messageApi.open({
           type: "error",
-          content: isRegisteredUserResult,
+          content: "No account is connected, connect your account!",
         });
         return false;
       }
     } else {
-      //User does not have metamask Installed
+      //User browser does not have digital wallet
       messageApi.open({
         type: "error",
-        content: "No Digital Wallet is connected !",
+        content: "No digital wallet is installed on your browser !",
       });
       return false;
     }
@@ -675,6 +683,8 @@ const login = () => {
                   fileName="blockchainPerformanceAnimation.json"
                   width={200}
                   divId="blockchainPerformanceAnimation"
+                  animationTitle="Performance"
+                  animationDescription="Performance animation"
                 />
               </div>
               <h1 className="text-2xl font-semibold text-white">Performance</h1>
@@ -710,6 +720,8 @@ const login = () => {
                   fileName="106808-blockchain.json"
                   width={200}
                   divId="106808-blockchain"
+                  animationTitle="Blockchain"
+                  animationDescription="Blockchain animation"
                 />
               </div>
               <h1 className="text-2xl font-semibold text-white">
