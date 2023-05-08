@@ -17,13 +17,14 @@ import SocialChainContractConstants from "@/constants/blockchain/SocialChainCont
  */
 export const getUserPosts = async () => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const accountAddresses = await provider.send("eth_requestAccounts", []);
+  const signer = provider.getSigner();
   const contract = new ethers.Contract(
     SocialChainContractConstants.SOCIAL_CHAIN_CONTRACT_ADDRESS,
     socialChainContractABI.abi,
-    provider
+    signer
   );
-  const accountAddresses = await provider.send("eth_requestAccounts", []);
-  const result = await contract.getUserPosts(accountAddresses[0]);
+  const result = await contract.getUserPosts();
 
   if (result.length === 0) {
     return null;
@@ -97,10 +98,11 @@ export const getUserPosts = async () => {
  */
 export const getFeedPosts = async (page, perPage) => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
   const contract = new ethers.Contract(
     SocialChainContractConstants.SOCIAL_CHAIN_CONTRACT_ADDRESS,
     socialChainContractABI.abi,
-    provider
+    signer
   );
   const accountAddresses = await provider.send("eth_requestAccounts", []);
   const result = await contract.getPostIds(page, perPage);
@@ -236,7 +238,6 @@ export const createNewPost = async (
     signer
   );
   const transaction = await contract.createPost(
-    newCreatePostObjectRequest.accountAddress,
     newCreatePostObjectRequest.postDescription,
     newCreatePostObjectRequest.imageHash
   );
@@ -359,6 +360,18 @@ export const createComment = async (postId, comment) => {
   }
 };
 
+/**
+ * This function retrieves comments for a specific post from a smart contract and returns them in a
+ * filtered format.
+ * @param postId - The ID of the post for which the comments are being fetched.
+ * @param listNumber - The number of the list of comments to retrieve.
+ * @param commentPerList - The number of comments to retrieve per list.
+ * @returns a Promise that resolves to an array of filtered comments for a given post. The comments are
+ * retrieved from a smart contract using the provided postId, listNumber, and commentPerList
+ * parameters. The comments are then filtered and mapped to include additional information such as the
+ * author's details, timestamp, commentId, likeCount, reportCount, and content. The Promise.all()
+ * method is used
+ */
 export const getPostComments = async (postId, listNumber, commentPerList) => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
