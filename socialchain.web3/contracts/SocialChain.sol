@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-// Uncomment this line to use console.log
-import "hardhat/console.sol";
-
 contract SocialChain {
-    address payable public owner; //Owner is also a maintainer
-    uint public totalUsers = 0;
-    uint public totalPosts = 0;
-    uint[] private postIds;
+    address payable public owner;
+    uint256 public totalUsers = 0;
+    uint256 public totalPosts = 0;
+    uint256 public totalComments = 0;
+    uint256[] private postIds;
 
     constructor() {
         owner = payable(msg.sender);
@@ -16,7 +14,7 @@ contract SocialChain {
     }
 
     struct User {
-        uint id;
+        uint256 id;
         address ethAddress;
         string userName;
         string name;
@@ -29,46 +27,52 @@ contract SocialChain {
     }
 
     struct Post {
-        uint postId;
+        uint256 postId;
         address author;
         string postDescription;
-        //ipfs location for the image
         string imgHash;
-        uint timeStamp;
-        uint likeCount;
-        uint reportCount;
+        uint256 timeStamp;
+        uint256 likeCount;
+        uint256 reportCount;
         postStatus status;
     }
 
     struct Comment {
-        uint commentId;
+        uint256 commentId;
         address author;
-        uint postId;
+        uint256 postId;
         string content;
-        uint likeCount;
-        uint reportCount;
-        uint timeStamp;
+        uint256 likeCount;
+        uint256 reportCount;
+        uint256 timeStamp;
+        commentStatus status;
     }
 
-    //mapping to get user details from user address
     mapping(address => User) private users;
-    //mapping to get user ad    dress from userName
     mapping(string => address) private userAddressFromUserName;
-    //mapping to check which username is taken
     mapping(string => bool) private usernames;
 
-    //mapping to get a post by post Id
-    mapping(uint => Post) private posts;
-    //mapping or list to store all postsId that is done by specific user (user address)
-    mapping(address => uint[]) private userPosts;
-    //mapping to track who like which post
-    mapping(uint => mapping(address => bool)) private postLikers;
+    mapping(uint256 => Post) private posts;
+    mapping(address => uint256[]) private userPosts;
+    mapping(uint256 => mapping(address => bool)) private postLikers;
 
-    event logRegisterUser(address userAddress, uint userId);
-    event logPostCreated(address _author, uint _userId, uint _postId);
+    mapping(uint256 => Comment) private comments;
+    mapping(address => uint256[]) userComments;
+    mapping(uint256 => uint256[]) private postComments;
+
+    event logRegisterUser(address userAddress, uint256 userId);
+    event logPostCreated(address _author, uint256 _userId, uint256 _postId);
+    event logCommentCreated(
+        address _author,
+        uint256 _commentId,
+        uint256 _postId,
+        uint256 _likeCount,
+        uint256 _reportCount,
+        uint256 _timeStamp,
+        string _content
+    );
 
     enum accountStatus {
-        //NP Stand for = Not present
         NP,
         Active,
         Banned,
@@ -76,6 +80,12 @@ contract SocialChain {
     }
 
     enum postStatus {
+        NP,
+        Active,
+        Banned,
+        Deleted
+    }
+    enum commentStatus {
         NP,
         Active,
         Banned,
@@ -102,7 +112,7 @@ contract SocialChain {
         _;
     }
 
-    modifier onlyActivePost(uint postId) {
+    modifier onlyActivePost(uint256 postId) {
         require(
             posts[postId].status == postStatus.Active,
             "Not an active post"
@@ -110,12 +120,21 @@ contract SocialChain {
         _;
     }
 
-    /*
-     **************************************USER FUNCTIONS********************************************************************************
-     */
-    function userNameAvailable(
-        string memory _username
-    ) public view returns (bool status) {
+    modifier onlyActiveComment(uint256 commentId) {
+        require(
+            comments[commentId].status == commentStatus.Active,
+            "Not an active comment"
+        );
+        _;
+    }
+
+    //#region Users function
+
+    function userNameAvailable(string memory _username)
+        public
+        view
+        returns (bool status)
+    {
         return !usernames[_username];
     }
 
@@ -125,7 +144,7 @@ contract SocialChain {
         string memory _imgHash,
         string memory _coverHash,
         string memory _bio,
-        uint birthDate,
+        uint256 birthDate,
         bool showUserName
     )
         public
@@ -138,7 +157,7 @@ contract SocialChain {
         //[2]- increase counter of total users
         totalUsers = totalUsers + 1;
         //[3]- set id of new user to the counter
-        uint id = totalUsers;
+        uint256 id = totalUsers;
         //[4]- add User object to our mapping of (address => user) for the specific registerd user
         users[msg.sender] = User(
             id,
@@ -158,17 +177,15 @@ contract SocialChain {
         emit logRegisterUser(msg.sender, id);
     }
 
-    function getUser(
-        address accountAddress
-    )
+    function getUser(address accountAddress)
         public
         view
         returns (
-            uint id,
+            uint256 id,
             string memory userName,
             string memory name,
             string memory bio,
-            uint birthDate,
+            uint256 birthDate,
             bool showUsername,
             string memory imageHash,
             string memory coverHash
@@ -188,19 +205,16 @@ contract SocialChain {
         );
     }
 
-    /*
-     **************************************POST FUNCTIONS***********************************************************
-     */
-    //--------ATTENTIONS:
-    //-- THIS FUNCTION NEED TO BE MODIFIED SO THAT ONLY ALLOWED USERS CAN POST
-    //-- The function should create the post by only the message sender address not by sending the address
-    function createPost(
-        address payable _accountAddress,
-        string memory _postdescription,
-        string memory _imghash
-    ) public onlyAllowedUser(msg.sender) {
+    //#endregion
+
+    //#region Post function
+
+    function createPost(string memory _postdescription, string memory _imghash)
+        public
+        onlyAllowedUser(msg.sender)
+    {
         totalPosts = totalPosts + 1;
-        uint postId = totalPosts;
+        uint256 postId = totalPosts;
         posts[postId] = Post(
             postId,
             msg.sender,
@@ -217,9 +231,7 @@ contract SocialChain {
         emit logPostCreated(msg.sender, users[msg.sender].id, postId);
     }
 
-    function getPostById(
-        uint _postId
-    )
+    function getPostById(uint256 _postId)
         public
         view
         onlyAllowedUser(msg.sender)
@@ -229,31 +241,152 @@ contract SocialChain {
         return posts[_postId];
     }
 
-    function getUserPosts(
-        address _userAddress
-    ) public view onlyAllowedUser(_userAddress) returns (Post[] memory) {
-        uint[] memory userPostIds = userPosts[_userAddress];
+    function getUserPosts()
+        public
+        view
+        onlyAllowedUser(msg.sender)
+        returns (Post[] memory)
+    {
+        uint256[] memory userPostIds = userPosts[msg.sender];
         Post[] memory userPostsTemp = new Post[](userPostIds.length);
-        for (uint i = 0; i < userPostIds.length; i++) {
+        for (uint256 i = 0; i < userPostIds.length; i++) {
             userPostsTemp[i] = posts[userPostIds[i]];
         }
         return userPostsTemp;
     }
 
     //Get posts - using of pagination to prevent huge data query and expensive process
-    function getPostIds(
-        uint _page,
-        uint _perPage
-    ) public view onlyAllowedUser(msg.sender) returns (uint[] memory) {
-        uint start = (_page - 1) * _perPage;
-        uint end = start + _perPage;
+    function getPostIds(uint256 _page, uint256 _perPage)
+        public
+        view
+        onlyAllowedUser(msg.sender)
+        returns (uint256[] memory)
+    {
+        uint256 start = (_page - 1) * _perPage;
+        uint256 end = start + _perPage;
         if (end > postIds.length) {
             end = postIds.length;
         }
-        uint[] memory result = new uint[](end - start);
-        for(uint i = start ; i < end; i++) {
-            result[i-start] = postIds[i];
+        uint256[] memory result = new uint256[](end - start);
+        for (uint256 i = start; i < end; i++) {
+            result[i - start] = postIds[i];
         }
         return result;
     }
+
+    function likePost(uint256 _postId)
+        public
+        onlyAllowedUser(msg.sender)
+        onlyActivePost(_postId)
+    {
+        //[1]- The post should not be liked already by the specfic user (should return false)
+        require(!postLikers[_postId][msg.sender]);
+        //[2]- increase number of likes for the specfied post:
+        posts[_postId].likeCount = posts[_postId].likeCount + 1;
+        //[3]- set that the specified user liked the post
+        postLikers[_postId][msg.sender] = true;
+    }
+
+    function unLikePost(uint256 _postId)
+        public
+        onlyAllowedUser(msg.sender)
+        onlyActivePost(_postId)
+    {
+        //[1]- Post should be like already by the speicifc user
+        require(postLikers[_postId][msg.sender]);
+        //[2]- decrase number of likes for the specfied post:
+        posts[_postId].likeCount = posts[_postId].likeCount - 1;
+        //[3]- set that the specified user liked the post
+        postLikers[_postId][msg.sender] = false;
+    }
+
+    function isLikedByAddress(uint256 _postId, address _userAddress)
+        public
+        view
+        onlyActivePost(_postId)
+        onlyAllowedUser(_userAddress)
+        returns (bool)
+    {
+        return postLikers[_postId][_userAddress];
+    }
+
+    //#endregion
+
+    //#region Comment functions
+
+    function createComment(uint256 _postId, string memory _comment)
+        public
+        onlyAllowedUser(msg.sender)
+        onlyActivePost(_postId)
+    {
+        //[1]- make sure comment is not empty
+        bytes memory tempStringValidation = bytes(_comment);
+        require(tempStringValidation.length != 0, "Comment can not be empty !");
+        //[2]- Id incremental
+        totalComments = totalComments + 1;
+        uint256 commentId = totalComments;
+        //[3]- Adding the post to the mapping
+        comments[commentId] = Comment(
+            commentId,
+            msg.sender,
+            _postId,
+            _comment,
+            0,
+            0,
+            block.timestamp,
+            commentStatus.Active
+        );
+        //[4]- Adding the comment to the post mapping (Each post can have many comments)
+        postComments[_postId].push(commentId);
+        //[5]- Log the created comment
+        //    event logCommentCreated(address _author,uint _commentId,uint _postId, uint _likeCount, uint _reportCount, uint _timeStamp, string _content);
+        emit logCommentCreated(
+            msg.sender,
+            commentId,
+            _postId,
+            0,
+            0,
+            block.timestamp,
+            _comment
+        );
+    }
+
+    function getCommentById(uint256 _commentId)
+        public
+        view
+        onlyAllowedUser(msg.sender)
+        onlyActiveComment(_commentId)
+        returns (Comment memory)
+    {
+        return comments[_commentId];
+    }
+
+    function getPostComments(
+        uint256 _listNumber,
+        uint256 _commentPerList,
+        uint256 _postId
+    )
+        public
+        view
+        onlyAllowedUser(msg.sender)
+        onlyActivePost(_postId)
+        returns (Comment[] memory)
+    {
+        uint256 startIndex = (_listNumber - 1) * _commentPerList;
+        uint256 endIndex = startIndex + _commentPerList;
+        //to avoid IndexOutOfRangeException
+        if (endIndex > postComments[_postId].length) {
+            endIndex = postComments[_postId].length;
+        }
+        Comment[] memory commentsResponse = new Comment[](
+            endIndex - startIndex
+        );
+        uint256 tempCommentId = 0;
+        for (uint256 i = startIndex; i < endIndex; i++) {
+            tempCommentId = postComments[_postId][i];
+            commentsResponse[i - startIndex] = comments[tempCommentId];
+        }
+        return commentsResponse;
+    }
+    //#endregion
 }

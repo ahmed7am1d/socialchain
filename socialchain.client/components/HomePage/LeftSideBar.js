@@ -16,16 +16,22 @@ import Image from "next/image";
 import useAuth from "@/hooks/useAuth";
 import { logOut } from "@/services/api/authService";
 import { useRouter } from "next/router";
+import useLogoutLoading from "@/hooks/useLogoutLoading";
 export const LeftSideBar = () => {
   const { auth, setAuth } = useAuth();
+  const {isLogoutLoading, setIsLogoutLoading} = useLogoutLoading();
   const router = useRouter();
+  const currentRoute = router.pathname;
+
   const handleLogOut = async () => {
+    setIsLogoutLoading(true);
     //[1]- Remove the cookies
     await logOut();
     //[2]- Clear the state
     setAuth({});
     //[3]- Forward to login
     router.push("/login");
+    setIsLogoutLoading(false);
   };
   return (
     <aside className={`p-5 bg-darkBlueHalfTrans  ${styles.asideWrapper}`}>
@@ -62,30 +68,30 @@ export const LeftSideBar = () => {
         <div className="mt-10">
           <p className=" text-gray-500 text-sm uppercase font-mono">Menu</p>
           <ul
-            className={`flex flex-col gap-y-5 mt-5 text-gray-300 text-md font-Arimo-navbar-font ${styles.homePageLeftNavigationWrapper}`}
+            className={`flex flex-col gap-y-5 mt-5 text-gray-300 text-sm font-sans ${styles.homePageLeftNavigationWrapper}`}
           >
             <Link href="/home">
-              <li className="flex items-center gap-x-5">
+              <li className={`flex items-center gap-x-5 ${currentRoute === "/home" && styles.homePageLeftNavigationWrapperActive}`}>
                 <HomeOutlined />
                 <span>Home</span>
               </li>
             </Link>
             <Link href="/home/profile">
-              <li className="flex items-center gap-x-5">
+              <li className={`flex items-center gap-x-5 ${currentRoute === "/home/profile" && styles.homePageLeftNavigationWrapperActive}`}>
                 <UserOutlined />
                 <span>My profile</span>
               </li>
             </Link>
-            <li className="flex items-center gap-x-5">
+            <li className={`flex items-center gap-x-5 ${currentRoute === "/home/cryptonews" && styles.homePageLeftNavigationWrapperActive}`}>
               <NotificationOutlined />
               <span>Latest crypto news</span>
             </li>
-            <li className="flex items-center gap-x-5">
+            {/* <li className="flex items-center gap-x-5">
               <EnvironmentOutlined />
               <span>Explore</span>
-            </li>
+            </li> */}
 
-            <li className="flex items-center gap-x-5">
+            <li className={`flex items-center gap-x-5 ${currentRoute === "/home/events" && styles.homePageLeftNavigationWrapperActive}`}>
               <CalendarOutlined />
               <span>Events</span>
             </li>
@@ -95,9 +101,9 @@ export const LeftSideBar = () => {
         <div>
           <p className=" text-gray-500 text-sm uppercase font-mono">Others</p>
           <ul
-            className={`flex flex-col gap-y-5 mt-5 text-gray-300 text-md font-Arimo-navbar-font   ${styles.homePageLeftNavigationWrapper}`}
+            className={`flex flex-col gap-y-5 mt-5 text-gray-300 text-sm font-sans  ${styles.homePageLeftNavigationWrapper}`}
           >
-            <li className="flex items-center gap-x-5">
+            <li className={`flex items-center gap-x-5 ${currentRoute === "/home/settings" && styles.homePageLeftNavigationWrapperActive}`}>
               <SettingOutlined />
               <span>Settings</span>
             </li>

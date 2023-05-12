@@ -40,7 +40,7 @@ task("social-chain-user", "Get the user details that calls the function")
   .setAction(async (taskArgs) => {
     const MyContract = await ethers.getContractFactory("SocialChain");
     const contract = await MyContract.attach(
-      "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      "0x775624b6E34A9570245dc8Fe374F3Bf9c9dEb039"
     );
     const result = await contract.getUser(taskArgs.accountaddress);
     console.log(result);
@@ -77,18 +77,32 @@ task("create-post", "Create new post")
   })
 
   //[6]- Get all user post 
-  task("get-user-posts","Get all users post")
-  .addParam("accountaddress", "The account address")
-  .setAction( async (taskArgs) => {
+  task("get-user-posts","Get all user's post")
+  .setAction( async () => {
     const MyContract = await ethers.getContractFactory("SocialChain");
     const contract = await MyContract.attach(
       "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     );
     const result = await contract.getUserPosts(
-      taskArgs.accountaddress
     );
     console.log(result);
   })
+  //[7]- Task to get the chain's accounts and their balances
+  task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+    const accounts = await hre.ethers.getSigners();
+    const provider = hre.ethers.provider;
+
+    for (const account of accounts) {
+        console.log(
+            "%s (%i ETH)",
+            account.address,
+            hre.ethers.utils.formatEther(
+                // getBalance returns wei amount, format to ETH amount
+                await provider.getBalance(account.address)
+            )
+        );
+    }
+});
 //#endregion
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -98,8 +112,14 @@ module.exports = {
     artifacts: "../socialchain.client/contract-artifacts",
   },
   networks: {
+    // Hardhat local blockchain
     localNetwork: {
       url: "http://127.0.0.1:8545/",
     },
+    // Ganache local blockchain
+    localGanache: {
+      url:'HTTP://127.0.0.1:7545',
+      accounts:['0x49267bba4707b01d5a42a6671a551ebe1e962d63b721d88a14929eef530fec6a']
+    }
   },
 };

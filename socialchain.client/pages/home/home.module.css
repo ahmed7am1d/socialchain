@@ -4,56 +4,57 @@
   padding-left: 5px;
   padding-right: 5px;
   cursor: pointer;
-  border-radius: 8px;
-  transition: .5s;
+  border-radius: 3px;
+  transition: 0.3s;
 }
 .homePageLeftNavigationWrapper li:hover {
   background-color: #e0a500;
-  transition: .5s;
+  transition: 0.3s;
 }
 
+.homePageLeftNavigationWrapperActive {
+  background-color: #9f7501;
+}
 
 /* Media queris for the left side bar navigations */
 @media only screen and (max-width: 900px) {
-
   .homePageLeftNavigationWrapper li span:nth-child(2) {
     display: none;
   }
   .homePageLeftNavigationWrapper li {
     padding-top: 6px;
-    padding-bottom:6px;
+    padding-bottom: 6px;
 
     display: flex;
     justify-content: center;
   }
   .homePageLeftNavigationWrapper li span:nth-child(1) {
     font-size: 17px;
-  } 
+  }
   .socialChainLogoWrapper {
     justify-content: center;
   }
-  .socialChainLogoWrapper h1{
+  .socialChainLogoWrapper h1 {
     display: none;
   }
 }
 
-@media only screen and (min-width: 900px) { 
+@media only screen and (min-width: 900px) {
   .socialChainLogoWrapper {
     justify-content: center;
   }
-   .profilePictureWrapper{
+  .profilePictureWrapper {
     display: none;
   }
 }
 
 /*#region feed navigation styles */
-
-.feedNavigationWrapper li  {
+.feedNavigationWrapper li {
   position: relative;
   cursor: pointer;
   width: 80px;
   text-align: center;
-  transition: .5s;
+  transition: 0.5s;
 }
 
 .feedNavigationWrapper li::after {
@@ -67,7 +68,7 @@
   left: 0;
   right: 0;
   opacity: 0;
-  transition: .5s;
+  transition: 0.5s;
 }
 
 .feedNavigationWrapper li::before {
@@ -82,7 +83,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  transition: .5s;
+  transition: 0.5s;
 }
 
 .feedNavigationWrapper li:hover::after {
@@ -93,3 +94,28 @@
   opacity: 0.3;
 }
 /*#endregion feed navigation styles */
+
+/*#region Like button styles*/
+.likeButtonContainer {
+  cursor: pointer;
+}
+.likeButtonContainer svg {
+  transition: all 0.5s ease;
+}
+.likeButtonContainer:hover svg {
+  color: red;
+  transform: scale(1.5);
+}
+
+.postIsLiked {
+  cursor: pointer;
+}
+.postIsLiked svg {
+  color: red;
+  transition: all 0.5s ease;
+}
+.postIsLiked:hover svg {
+  color: white;
+  transform: scale(1.5);
+}
+/*#endregion */

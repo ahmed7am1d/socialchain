@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import Lottie from "lottie-web";
-export const LottieAnimation = ({fileName, width,divId}) => {
+export const LottieAnimation = ({fileName, width,divId,animationTitle, animationDescription}) => {
   const ref = useRef(null);
   useEffect(() => {
     if (ref.current) {
@@ -17,8 +17,8 @@ export const LottieAnimation = ({fileName, width,divId}) => {
         progressiveLoad: true,
         preserveAspectRatio: "xMidYMid meet",
         imagePreserveAspectRatio: "xMidYMid meet",
-        title: "TEST TITLE",
-        description: "TEST DESCRIPTION",
+        title: animationTitle,
+        description: animationDescription,
       },
       path: fileName,
     });
@@ -27,17 +27,6 @@ export const LottieAnimation = ({fileName, width,divId}) => {
       console.log(errorType);
     };
 
-    anim.addEventListener("error", function (error) {
-      console.log(error);
-    });
-
-    anim.addEventListener("error", function (error) {
-      console.log(error);
-    });
-
-    anim.addEventListener("DOMLoaded", function () {
-      console.log("DOMLoaded");
-    });
   }, []);
   return (
     <div

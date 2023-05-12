@@ -1,0 +1,43 @@
+Website's fonts: 
+--------------------------------------------------------------
+LeftSide bar: 
+	- Section title => font-mono
+	- Navigations => font-sans
+========================================
+RightSide bar: 
+	- Section title => font-mono
+	- username => font-sans
+	- friends:
+		- font-size: xs
+		- font-family: font-sans
+========================================
+Feed Component: 
+	- About me:
+		- title => font-mono
+		- bio => font-sans
+	- Blockchain event: 
+		- title => font-sans
+		- date => font-sans
+	- Share post form:
+		- user photo + post title => font-sans
+		- tag + loc + mood + share button + upload =>
+	- Post container: 
+		- logo + username + date (created by) => font-sans
+		- post desctiption => font-sans
+		- number of (comments + likes + share) => font-sans
+	- Comments:
+		- comment input field => font-sans
+		- comment title => font-sans
+		- comment (like + report + timestamp): 
+			- font-size: xs
+			- font-family: font-sans
+	- Post modal: 
+		- owner => font-sans
+		- logo + username + date (created by) => font-sans
+		- post desctiption => font-sans
+		- number of (comments + likes + share) => font-sans
+		- comment input field => font-sans
+		- comment title => font-sans
+		- comment (like + report + timestamp): 
+			- font-size: xs
+			- font-family: font-sans

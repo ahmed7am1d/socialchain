@@ -21,7 +21,7 @@ import {
   kava,
   osmosis,
   uploadImage,
-} from "./imports";
+} from "../../imports/loginImports.js";
 
 import Image from "next/image";
 import classes from "./login.module.css";
@@ -34,29 +34,44 @@ import SocialChainContract from "../../contract-artifacts/contracts/SocialChain.
 import { euDateToISO8601, iSO8601ToUnixDate } from "@/utils/Date/dateUtils";
 import extractContractErrorMessage from "@/utils/Errors/extractContractErrorMessageUtils";
 import { LottieAnimation } from "@/components/Animations/LottieAnimation";
-import { Typewriter } from "react-simple-typewriter";
-export async function getServerSideProps(context) {
-  //Catching the error if no cookies exists
-  try {
-    const cookies = cookie.parse(context.req.headers.cookie);
-    const accessToken = cookies?.accessToken;
 
-    if (await isValidJWT(accessToken)) {
+/**
+ * Returns the initial props for a Next.js page, based on the context object.
+ * If the user has a valid access token cookie, redirects them to the home page (A logged in user can not access login page).
+ * Otherwise, returns an empty props object.
+ *
+ * @param {Object} context - The context object for the page.
+ * @param {Object} context.req - The HTTP request object.
+ * @returns {Object} An object containing either a redirect destination or an empty props object.
+ * @throws {Error} If an error occurs while parsing the cookies or.
+ */
+export async function getServerSideProps(context) {
+  try {
+    const cookies = cookie.parse(context.req.headers.cookie || ""); // Use an empty string if there is no cookie header
+    const accessToken = cookies?.accessToken;
+    if (accessToken) {
+      if (await isValidJWT(accessToken)) {
+        return {
+          redirect: {
+            destination: "/home",
+            permanent: false,
+          },
+          props: {},
+        };
+      } else {
+        return {
+          props: {},
+        };
+      }
+    } else {
       return {
-        redirect: {
-          destination: "/home",
-          permanent: false,
-        },
         props: {},
       };
     }
-
-    return {
-      props: {}, // will be passed to the page component as props
-    };
   } catch (e) {
+    console.error(e); // Log the error for debugging purposes
     return {
-      props: {}, // will be passed to the page component as props
+      props: {},
     };
   }
 }
@@ -120,8 +135,10 @@ const login = () => {
             );
             userRegisterObject.ipfsProfilePictureHash = ipfsProfilePictureHash;
           } catch (error) {
-            console.error(error);
-            // handle error of ipfs uploading
+            messageApi.open({
+              type: "error",
+              content: "Failed to upload image to IPFS !!",
+            });
           }
         }
 
@@ -152,7 +169,7 @@ const login = () => {
           //transactionResult.events[0].userAddress
           //transactionResult.events[0].userId
           //If the transaction is successful remember me should be stored:
-          localStorage.setItem("rememberMe", "true");
+          document.cookie = "rememberMe=true";
         } catch (error) {
           //Contract Error
           const errorMessage = extractContractErrorMessage(error.data.message);
@@ -191,15 +208,16 @@ const login = () => {
         } catch (e) {
           messageApi.open({
             type: "error",
-            content: "You have to sign the message to register to get JWT !!",
+            content:
+              "You have to sign the message to be able to access the website pages!!",
           });
           return false;
         }
       } catch (e) {
+        console.log(e);
         messageApi.open({
           type: "error",
-          content:
-            "You have to connect to your account to be able to continue !!",
+          content: "You have to connect your wallet to continue !!",
         });
         return false;
       }
@@ -249,58 +267,66 @@ const login = () => {
     if (window.ethereum) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       //let the user connect to his account
-      //add try here:
-      const accountAddresses = await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const isRegisteredUserResult = await isRegisteredUser(
-        accountAddresses[0]
-      );
-      if (isRegisteredUserResult === true) {
-        console.log("Registered User");
-        //[A]- nonce
-        const messageTempToken = await nonce(accountAddresses[0]);
-        //[B]- get user signature
-        let signature = "";
-        try {
-          signature = await signer.signMessage(messageTempToken.message);
-          //[C]- verify and get accessToken
-          const accessTokenAndDataResult = await verify(
-            messageTempToken.tempToken,
-            signature
-          );
-          if (accessTokenAndDataResult?.status > 206) {
+      try {
+        const accountAddresses = await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+        const isRegisteredUserResult = await isRegisteredUser(
+          accountAddresses[0]
+        );
+        if (isRegisteredUserResult === true) {
+          //[A]- nonce
+          const messageTempToken = await nonce(accountAddresses[0]);
+          //[B]- get user signature
+          let signature = "";
+          try {
+            signature = await signer.signMessage(messageTempToken.message);
+            //[C]- verify and get accessToken
+            const accessTokenAndDataResult = await verify(
+              messageTempToken.tempToken,
+              signature
+            );
+            if (accessTokenAndDataResult?.status > 206) {
+              messageApi.open({
+                type: "error",
+                content: accessTokenAndDataResult?.data?.title,
+              });
+              return false;
+            }
+            //[5]- Forward the user to the login page with sending parameters
+            router.push(
+              {
+                pathname: "/home/profile",
+              },
+              "./home/profile"
+            );
+          } catch (e) {
             messageApi.open({
               type: "error",
-              content: accessTokenAndDataResult?.data?.title,
+              content:
+                "You have to sign the message to make sure you are a verified user !!",
             });
             return false;
           }
-          //[5]- Forward the user to the login page with sending parameters
-          router.push(
-            {
-              pathname: "/home/profile",
-            },
-            "./home/profile"
-          );
-        } catch (e) {
+        } else {
           messageApi.open({
             type: "error",
-            content: "You have to sign the message to register to get JWT !!",
+            content: isRegisteredUserResult,
           });
           return false;
         }
-      } else {
+      } catch (err) {
+        //User reject to connect his account
         messageApi.open({
           type: "error",
-          content: isRegisteredUserResult,
+          content: "No account is connected, connect your account!",
         });
         return false;
       }
     } else {
-      //User does not have metamask Installed
+      //User browser does not have digital wallet
       messageApi.open({
         type: "error",
-        content: "No Digital Wallet is connected !",
+        content: "No digital wallet is installed on your browser !",
       });
       return false;
     }
@@ -657,6 +683,8 @@ const login = () => {
                   fileName="blockchainPerformanceAnimation.json"
                   width={200}
                   divId="blockchainPerformanceAnimation"
+                  animationTitle="Performance"
+                  animationDescription="Performance animation"
                 />
               </div>
               <h1 className="text-2xl font-semibold text-white">Performance</h1>
@@ -692,6 +720,8 @@ const login = () => {
                   fileName="106808-blockchain.json"
                   width={200}
                   divId="106808-blockchain"
+                  animationTitle="Blockchain"
+                  animationDescription="Blockchain animation"
                 />
               </div>
               <h1 className="text-2xl font-semibold text-white">

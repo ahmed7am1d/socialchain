@@ -5,8 +5,10 @@ import { ethers } from "ethers";
 import useAuth from "@/hooks/useAuth";
 import socialChainContractABI from "../contract-artifacts/contracts/SocialChain.sol/SocialChain.json";
 import SocialChainContractConstants from "@/constants/blockchain/SocialChainContractConstants";
+import useLogoutLoading from "@/hooks/useLogoutLoading";
 const HomePageLayout = ({ children }) => {
   const { setAuth } = useAuth();
+  const { isLogoutLoading } = useLogoutLoading();
   useEffect(() => {
     async function setUserInformation() {
       //[1]- Get user object from the contract
@@ -35,36 +37,42 @@ const HomePageLayout = ({ children }) => {
     setUserInformation();
   }, []);
   return (
-    <div
-      className="
+    <>
+      {isLogoutLoading ? (
+        <div>Forward to login page ..........</div>
+      ) : (
+        <div
+          className="
       font-mono
       lg:grid-cols-7
       grid grid-cols-7
       h-screen
       divide-x
       divide-gray-700"
-    >
-      <LeftSideBar />
-      <section
-        className="
+        >
+          <LeftSideBar />
+          <section
+            className="
       lg:col-span-5
       col-span-6
       overflow-x-hidden
       scrollbar-thin"
-      >
-        {/* Search bar - takes full width with padding from inside */}
-        <header className="text-sm h-[70px] font-sans">
-          <input
-            type="search"
-            className="w-full h-full text-white p-5 bg-darkBlueHalfTrans outline-none
+          >
+            {/* Search bar - takes full width with padding from inside */}
+            <header className="text-sm h-[70px] font-sans">
+              <input
+                type="search"
+                className="w-full h-full text-white p-5 bg-darkBlueHalfTrans outline-none
         "
-            placeholder="Search for people, content, blogs..."
-          />
-        </header>
-        {children}
-      </section>
-      <RightSideBar />
-    </div>
+                placeholder="Search for people, content, blogs..."
+              />
+            </header>
+            {children}
+          </section>
+          <RightSideBar />
+        </div>
+      )}
+    </>
   );
 };
 
