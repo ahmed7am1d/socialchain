@@ -1,8 +1,9 @@
-bB# SocialChain - A Decentralized Social Network
+# SocialChain - A Decentralized Social Network
 **SocialChain** is a decentralized social media platform,
 that uses the power of blockchain to eliminate the idea of central authority,
  and the fact that a central authority owns the users' data.
 # Table of content
+- [SocialChain - A Decentralized Social Network](#socialchain---a-decentralized-social-network)
 - [Table of content](#table-of-content)
 - [1. Project's description](#1-projects-description)
   - [1.1 Architecture of the application](#11-architecture-of-the-application)
