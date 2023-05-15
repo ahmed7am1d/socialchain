@@ -76,7 +76,7 @@ export const LeftSideBar = () => {
                 <span>Home</span>
               </li>
             </Link>
-            <Link href="/home/profile">
+            <Link href={`/home/profile/${auth?.accountAddress}`}>
               <li className={`flex items-center gap-x-5 ${currentRoute === "/home/profile" && styles.homePageLeftNavigationWrapperActive}`}>
                 <UserOutlined />
                 <span>My profile</span>

@@ -9,7 +9,7 @@ import {
   SendOutlined,
 } from "@ant-design/icons";
 import ConfettiExplosion from "react-confetti-explosion";
-
+import Link from "next/link";
 
 const Post = ({
   isUserProfile,
@@ -50,13 +50,16 @@ const Post = ({
           </div>
           <div>
             <p>
-              {isUserProfile ? (
-                <strong>{auth?.userName}</strong>
-              ) : (
-                <strong>{post?.userName}</strong>
-              )}
-             {" "} shared a post
+              <Link href={`/home/profile/${post?.author}`}>
+                {isUserProfile ? (
+                  <strong>{auth?.userName}</strong>
+                ) : (
+                  <strong>{post?.userName}</strong>
+                )}{" "}
+                shared a post
+              </Link>
             </p>
+
             <p className="text-gray-400">{post?.timeStamp}</p>
           </div>
         </div>

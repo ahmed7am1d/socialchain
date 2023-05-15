@@ -1,10 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import userTempCover from "../../assets/Images/userTempCoverPhoto.jpg";
 import styles from "../../pages/home/home.module.css";
 import useAuth from "@/hooks/useAuth";
-export const UserProfile = () => {
+import { getUserByAccountAddress } from "@/services/web3/contractServices";
+export const UserProfile = ({ userId }) => {
   const { auth } = useAuth();
+  const [userObject, setUserObject] = useState({});
+
+  useEffect(() => {
+    async function setUserData() {
+      if (userId?.toUpperCase() !== auth?.accountAddress?.toUpperCase()) {
+        //[1]- Fetch the new user data
+        const userObjectResult = await getUserByAccountAddress(userId);
+        setUserObject(userObjectResult);
+      } else {
+        setUserObject(auth);
+      }
+    }
+    setUserData();
+  }, [userId]);
 
   return (
     <section className="m-5 flex flex-col relative">
@@ -28,7 +43,7 @@ export const UserProfile = () => {
             flex relative overflow-hidden rounded-full"
         >
           <Image
-            src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+            src={`https://ipfs.io/ipfs/${userObject?.imageHash}`}
             alt="Profile Photo"
             layout="fill"
             objectFit="cover"
@@ -36,8 +51,8 @@ export const UserProfile = () => {
         </div>
         {/* userName + name*/}
         <div>
-          <div className="text-2xl text-white ">{auth?.userName}</div>
-          <div className="text-xl text-gray-400 ">{auth?.name}</div>
+          <div className="text-2xl text-white ">{userObject?.userName}</div>
+          <div className="text-xl text-gray-400 ">{userObject?.name}</div>
         </div>
       </div>
       {/* navigation's */}
