@@ -552,4 +552,4 @@ Contract events are mostly used like the behavior in the api when returning a re
 #### Front-end notes:
 #### <span style="color:red">1- Modifiers error messages:</span>
 - The modifiers when they return error message, in the front-end:
-  - (socialchain.client) => (utils) => (extractContractErrorMessageUtils.js) , this utils will be responsible to retrieve the error message from the modifier
+  - (socialchain.client) => (utils) => (extractContractModifierErrorMessageUtils.js) , this utils will be responsible to retrieve the error message from the modifier

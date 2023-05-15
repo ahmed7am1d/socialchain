@@ -1,6 +1,6 @@
 import React from 'react'
 
-const extractContractErrorMessage = (evmError) => {
+const extractContractModifierErrorMessage = (evmError) => {
     const prefix = "reverted with reason string '";
     const suffix = "'";
     const startIndex = evmError.indexOf(prefix) + prefix.length;
@@ -11,4 +11,4 @@ const extractContractErrorMessage = (evmError) => {
     return evmError.slice(startIndex,endIndex);
 }
 
-export default extractContractErrorMessage
+export default extractContractModifierErrorMessage
