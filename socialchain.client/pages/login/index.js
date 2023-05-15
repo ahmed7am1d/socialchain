@@ -32,7 +32,7 @@ import fileToBase64 from "@/utils/Files/fileUtils";
 import SocialChainContractConstants from "@/constants/blockchain/SocialChainContractConstants";
 import SocialChainContract from "../../contract-artifacts/contracts/SocialChain.sol/SocialChain.json";
 import { euDateToISO8601, iSO8601ToUnixDate } from "@/utils/Date/dateUtils";
-import extractContractErrorMessage from "@/utils/Errors/extractContractErrorMessageUtils";
+import extractContractModifierErrorMessage from "@/utils/Errors/extractContractModifierErrorMessageUtils";
 import { LottieAnimation } from "@/components/Animations/LottieAnimation";
 
 /**
@@ -172,7 +172,7 @@ const login = () => {
           document.cookie = "rememberMe=true";
         } catch (error) {
           //Contract Error
-          const errorMessage = extractContractErrorMessage(error.data.message);
+          const errorMessage = extractContractModifierErrorMessage(error.data.message);
           messageApi.open({
             type: "error",
             content: errorMessage,
