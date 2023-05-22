@@ -15,7 +15,7 @@ import SocialChainContractConstants from "@/constants/blockchain/SocialChainCont
  * interact with a smart contract on the Ethereum blockchain to retrieve the user's posts and
  * associated comments.
  */
-export const getUserPosts = async () => {
+export const getUserPosts = async (userId) => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const accountAddresses = await provider.send("eth_requestAccounts", []);
   const signer = provider.getSigner();
@@ -24,7 +24,7 @@ export const getUserPosts = async () => {
     socialChainContractABI.abi,
     signer
   );
-  const result = await contract.getUserPosts();
+  const result = await contract.getUserPosts(userId);
 
   if (result.length === 0) {
     return null;

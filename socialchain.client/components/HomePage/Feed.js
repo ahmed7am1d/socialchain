@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
 import useAuth from "@/hooks/useAuth";
 import useIPFS from "@/hooks/useIPFS";
 import fileToBase64 from "@/utils/Files/fileUtils";
@@ -10,9 +11,7 @@ import {
   DotsThree,
 } from "phosphor-react";
 import blockChainEvent from "../../assets/Images/blockChainEvent.png";
-import {
-  DeleteOutlined
-} from "@ant-design/icons";
+import { DeleteOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import { Form, message } from "antd";
 import { motion } from "framer-motion";
@@ -24,16 +23,19 @@ import {
   getUserPosts,
   likePost,
   unLikePost,
+  getUserByAccountAddress,
 } from "@/services/web3/contractServices";
 import PostModal from "./Modals/PostModal";
 import Post from "./Post";
-export const Feed = ({ isUserProfile }) => {
+export const Feed = ({ isUserProfile, userId }) => {
   //#region states and variables
+  const router = useRouter();
   const [userPosts, setUserPosts] = useState([]);
   const [feedPosts, setFeedPosts] = useState([]);
   const [isPostModalOpen, setIsModalOpen] = useState(false);
   const [postModalData, setPostModalData] = useState({});
   const { auth } = useAuth();
+  const [userObject, setUserObject] = useState({});
   const [messageApi, contextHolder] = message.useMessage();
 
   const { uploadFileToIPFS } = useIPFS();
@@ -339,24 +341,40 @@ export const Feed = ({ isUserProfile }) => {
     setPostModalPagination(1);
     async function loadPosts() {
       if (isUserProfile) {
-        const userPostsTemp = await getUserPosts();
-        userPostsTemp && setUserPosts(userPostsTemp);
+        if (router.isReady) {
+          const userPostsTemp = await getUserPosts(userId);
+          userPostsTemp && setUserPosts(userPostsTemp);
+        }
       } else {
         const postIds = await getFeedPosts(1, 10);
         postIds && setFeedPosts(postIds);
       }
     }
+    async function setUserData() {
+      //Get the new user data that was clicked by a user only if it is user profile page and only if it is not author
+      if (isUserProfile) {
+        if (userId !== auth.accountAddress) {
+          const userObjectResult = await getUserByAccountAddress(userId);
+          setUserObject(userObjectResult);
+        } else {
+          setUserObject(auth);
+        }
+      } else {
+        setUserObject(auth);
+      }
+    }
     setIsloadingBlockChainData(true);
+    setUserData();
     loadPosts();
     setIsloadingBlockChainData(false);
-  }, []);
+  }, [router.isReady, userId, auth]);
   //#endregion
 
   return (
     <>
       {contextHolder}
       {isloadingBlockChainData ? (
-        <div className="bg-red-400">Loading...</div>
+        <div>Loading...</div>
       ) : (
         <div>
           {/* Modal - FirstDiv [to overlay all page content] middle of page */}
@@ -394,7 +412,7 @@ export const Feed = ({ isUserProfile }) => {
                   </div>
                 </div>
                 <div className="text-gray-300 relative p-2 font-sans">
-                  <p className="text-sm">{auth.bio}</p>
+                  <p className="text-sm">{userObject?.bio}</p>
                 </div>
               </div>
               {/* Event */}
@@ -414,133 +432,270 @@ export const Feed = ({ isUserProfile }) => {
             {/* feed */}
             <section className="col-span-3 lg:col-span-2 text-sm">
               {/* Share post container */}
-              <Form
-                form={createPostForm}
-                onFinish={handleCreatePostForm}
-                className="gap-y-5 flex  p-4  bg-darkBlueHalfTrans flex-col   rounded-md"
-                initialValues={{
-                  postImage: "",
-                  postDescription: "",
-                }}
-              >
-                <div className="flex items-start gap-x-5 mt-2">
-                  {/* User image + post title */}
-                  <div
-                    className={`
+              {isUserProfile ? (
+                auth.accountAddress === userId && (
+                  <Form
+                    form={createPostForm}
+                    onFinish={handleCreatePostForm}
+                    className="gap-y-5 flex  p-4  bg-darkBlueHalfTrans flex-col   rounded-md"
+                    initialValues={{
+                      postImage: "",
+                      postDescription: "",
+                    }}
+                  >
+                    <div className="flex items-start gap-x-5 mt-2">
+                      {/* User image + post title */}
+                      <div
+                        className={`
+   h-8 w-8
+   p-4
+   md:h-10
+   md:w-10
+   flex relative overflow-hidden rounded-full `}
+                      >
+                        <Image
+                          className="rounded-full"
+                          src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                          layout="fill"
+                          objectFit="cover"
+                          alt="Profile picture"
+                        />
+                      </div>
+                      <div className="w-full">
+                        <Form.Item name="postDescription">
+                          <input
+                            autoComplete="off"
+                            name="postDescription"
+                            className="w-full bg-darkBlueHalfTrans outline-none text-white"
+                            placeholder="Write something..."
+                          />
+                        </Form.Item>
+                      </div>
+                    </div>
+                    {/* Upload photo */}
+                    {selectedProfilePictureSrc ? (
+                      <motion.div
+                        className="flex justify-center relative"
+                        initial={{
+                          opacity: 0,
+                        }}
+                        animate={{
+                          opacity: 1,
+                        }}
+                        transition={{
+                          duration: 2,
+                        }}
+                      >
+                        <Image
+                          src={selectedProfilePictureSrc}
+                          width={32}
+                          height={32}
+                          className="w-52 h-52  mt-0 mb-10 rounded-md"
+                          alt="User profile container"
+                        />
+                        <div
+                          className=" duration-200 cursor-pointer absolute rounded-md flex items-center justify-center w-52 h-52 mb-10 opacity-0 hover:opacity-100 hover:bg-gray-600 mt-0 m"
+                          onClick={deleteProfileImageHandler}
+                        >
+                          <DeleteOutlined
+                            style={{ fontSize: "30px", color: "white" }}
+                          />
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <button
+                        onClick={showOpenFileDialog}
+                        type="button"
+                        className="group relative h-fit w-fit px-2 pl-4 py-1 overflow-hidden rounded-lg bg-darkBlue text-md shadow"
+                      >
+                        <div className="absolute inset-0 w-3 bg-amber-400 transition-all duration-[400ms] ease-out group-hover:w-full"></div>
+                        <span className="relative flex items-center gap-x-2 ">
+                          <Upload size={20} className="text-white" />
+                          <span className="text-white">Upload Photo </span>
+                        </span>
+                      </button>
+                    )}
+                    <Form.Item name="postImage" className="hidden">
+                      <input
+                        ref={imageRef}
+                        type="file"
+                        style={{ display: "none" }}
+                        accept="image/*"
+                        onChange={handleProfileImageChange}
+                        onClick={(e) => {
+                          e.target.value = null;
+                        }}
+                      />
+                    </Form.Item>
+                    {/* button - type and additional feelings */}
+                    <div className="flex items-center justify-between w-full text-gray-400">
+                      <div className="flex flex-row w-full gap-x-7">
+                        <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
+                          <Users size={23} />
+                          <p className="hidden sm:block md:block lg:block">
+                            Tag a friend
+                          </p>
+                        </div>
+                        <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
+                          <NavigationArrow size={23} />
+                          <p className="hidden sm:block md:block lg:block">
+                            Share a location
+                          </p>
+                        </div>
+                        <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
+                          <MaskHappy size={23} />
+                          <p className="hidden sm:block md:block lg:block">
+                            Mood
+                          </p>
+                        </div>
+                      </div>
+                      <div>
+                        <button
+                          type="submit"
+                          href="#_"
+                          className="shadow-sm shadow-white  hover:shadow-md  duration-300 ease-out hover:shadow-primaryGoldColor relative inline-flex items-center justify-start px-7 py-1 overflow-hidden font-medium transition-all bg-darkBlue rounded hover:bg-white group"
+                        >
+                          <span className="w-48 h-48 rounded rotate-[-40deg] bg-white absolute bottom-0 left-0 -translate-x-full ease-out duration-700 transition-all translate-y-full mb-9 ml-9 group-hover:ml-0 group-hover:mb-32 group-hover:translate-x-0"></span>
+                          <span className="relative w-full text-left text-white transition-colors duration-700 ease-in-out group-hover:text-black ">
+                            Share
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </Form>
+                )
+              ) : (
+                <Form
+                  form={createPostForm}
+                  onFinish={handleCreatePostForm}
+                  className="gap-y-5 flex  p-4  bg-darkBlueHalfTrans flex-col   rounded-md"
+                  initialValues={{
+                    postImage: "",
+                    postDescription: "",
+                  }}
+                >
+                  <div className="flex items-start gap-x-5 mt-2">
+                    {/* User image + post title */}
+                    <div
+                      className={`
             h-8 w-8
             p-4
             md:h-10
             md:w-10
             flex relative overflow-hidden rounded-full `}
-                  >
-                    <Image
-                      className="rounded-full"
-                      src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
-                      layout="fill"
-                      objectFit="cover"
-                      alt="Profile picture"
-                    />
-                  </div>
-                  <div className="w-full">
-                    <Form.Item name="postDescription">
-                      <input
-                        autoComplete="off"
-                        name="postDescription"
-                        className="w-full bg-darkBlueHalfTrans outline-none text-white"
-                        placeholder="Write something..."
-                      />
-                    </Form.Item>
-                  </div>
-                </div>
-                {/* Upload photo */}
-                {selectedProfilePictureSrc ? (
-                  <motion.div
-                    className="flex justify-center relative"
-                    initial={{
-                      opacity: 0,
-                    }}
-                    animate={{
-                      opacity: 1,
-                    }}
-                    transition={{
-                      duration: 2,
-                    }}
-                  >
-                    <Image
-                      src={selectedProfilePictureSrc}
-                      width={32}
-                      height={32}
-                      className="w-52 h-52  mt-0 mb-10 rounded-md"
-                      alt="User profile container"
-                    />
-                    <div
-                      className=" duration-200 cursor-pointer absolute rounded-md flex items-center justify-center w-52 h-52 mb-10 opacity-0 hover:opacity-100 hover:bg-gray-600 mt-0 m"
-                      onClick={deleteProfileImageHandler}
                     >
-                      <DeleteOutlined
-                        style={{ fontSize: "30px", color: "white" }}
+                      <Image
+                        className="rounded-full"
+                        src={`https://ipfs.io/ipfs/${auth?.imageHash}`}
+                        layout="fill"
+                        objectFit="cover"
+                        alt="Profile picture"
                       />
                     </div>
-                  </motion.div>
-                ) : (
-                  <button
-                    onClick={showOpenFileDialog}
-                    type="button"
-                    className="group relative h-fit w-fit px-2 pl-4 py-1 overflow-hidden rounded-lg bg-darkBlue text-md shadow"
-                  >
-                    <div className="absolute inset-0 w-3 bg-amber-400 transition-all duration-[400ms] ease-out group-hover:w-full"></div>
-                    <span className="relative flex items-center gap-x-2 ">
-                      <Upload size={20} className="text-white" />
-                      <span className="text-white">Upload Photo </span>
-                    </span>
-                  </button>
-                )}
-                <Form.Item name="postImage" className="hidden">
-                  <input
-                    ref={imageRef}
-                    type="file"
-                    style={{ display: "none" }}
-                    accept="image/*"
-                    onChange={handleProfileImageChange}
-                    onClick={(e) => {
-                      e.target.value = null;
-                    }}
-                  />
-                </Form.Item>
-                {/* button - type and additional feelings */}
-                <div className="flex items-center justify-between w-full text-gray-400">
-                  <div className="flex flex-row w-full gap-x-7">
-                    <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
-                      <Users size={23} />
-                      <p className="hidden sm:block md:block lg:block">
-                        Tag a friend
-                      </p>
-                    </div>
-                    <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
-                      <NavigationArrow size={23} />
-                      <p className="hidden sm:block md:block lg:block">
-                        Share a location
-                      </p>
-                    </div>
-                    <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
-                      <MaskHappy size={23} />
-                      <p className="hidden sm:block md:block lg:block">Mood</p>
+                    <div className="w-full">
+                      <Form.Item name="postDescription">
+                        <input
+                          autoComplete="off"
+                          name="postDescription"
+                          className="w-full bg-darkBlueHalfTrans outline-none text-white"
+                          placeholder="Write something..."
+                        />
+                      </Form.Item>
                     </div>
                   </div>
-                  <div>
+                  {/* Upload photo */}
+                  {selectedProfilePictureSrc ? (
+                    <motion.div
+                      className="flex justify-center relative"
+                      initial={{
+                        opacity: 0,
+                      }}
+                      animate={{
+                        opacity: 1,
+                      }}
+                      transition={{
+                        duration: 2,
+                      }}
+                    >
+                      <Image
+                        src={selectedProfilePictureSrc}
+                        width={32}
+                        height={32}
+                        className="w-52 h-52  mt-0 mb-10 rounded-md"
+                        alt="User profile container"
+                      />
+                      <div
+                        className=" duration-200 cursor-pointer absolute rounded-md flex items-center justify-center w-52 h-52 mb-10 opacity-0 hover:opacity-100 hover:bg-gray-600 mt-0 m"
+                        onClick={deleteProfileImageHandler}
+                      >
+                        <DeleteOutlined
+                          style={{ fontSize: "30px", color: "white" }}
+                        />
+                      </div>
+                    </motion.div>
+                  ) : (
                     <button
-                      type="submit"
-                      href="#_"
-                      className="shadow-sm shadow-white  hover:shadow-md  duration-300 ease-out hover:shadow-primaryGoldColor relative inline-flex items-center justify-start px-7 py-1 overflow-hidden font-medium transition-all bg-darkBlue rounded hover:bg-white group"
+                      onClick={showOpenFileDialog}
+                      type="button"
+                      className="group relative h-fit w-fit px-2 pl-4 py-1 overflow-hidden rounded-lg bg-darkBlue text-md shadow"
                     >
-                      <span className="w-48 h-48 rounded rotate-[-40deg] bg-white absolute bottom-0 left-0 -translate-x-full ease-out duration-700 transition-all translate-y-full mb-9 ml-9 group-hover:ml-0 group-hover:mb-32 group-hover:translate-x-0"></span>
-                      <span className="relative w-full text-left text-white transition-colors duration-700 ease-in-out group-hover:text-black ">
-                        Share
+                      <div className="absolute inset-0 w-3 bg-amber-400 transition-all duration-[400ms] ease-out group-hover:w-full"></div>
+                      <span className="relative flex items-center gap-x-2 ">
+                        <Upload size={20} className="text-white" />
+                        <span className="text-white">Upload Photo </span>
                       </span>
                     </button>
+                  )}
+                  <Form.Item name="postImage" className="hidden">
+                    <input
+                      ref={imageRef}
+                      type="file"
+                      style={{ display: "none" }}
+                      accept="image/*"
+                      onChange={handleProfileImageChange}
+                      onClick={(e) => {
+                        e.target.value = null;
+                      }}
+                    />
+                  </Form.Item>
+                  {/* button - type and additional feelings */}
+                  <div className="flex items-center justify-between w-full text-gray-400">
+                    <div className="flex flex-row w-full gap-x-7">
+                      <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
+                        <Users size={23} />
+                        <p className="hidden sm:block md:block lg:block">
+                          Tag a friend
+                        </p>
+                      </div>
+                      <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
+                        <NavigationArrow size={23} />
+                        <p className="hidden sm:block md:block lg:block">
+                          Share a location
+                        </p>
+                      </div>
+                      <div className="flex gap-x-2 transition-all duration-200 hover:bg-gray-400 hover:bg-opacity-10 p-2 hover:cursor-pointer rounded-md">
+                        <MaskHappy size={23} />
+                        <p className="hidden sm:block md:block lg:block">
+                          Mood
+                        </p>
+                      </div>
+                    </div>
+                    <div>
+                      <button
+                        type="submit"
+                        href="#_"
+                        className="shadow-sm shadow-white  hover:shadow-md  duration-300 ease-out hover:shadow-primaryGoldColor relative inline-flex items-center justify-start px-7 py-1 overflow-hidden font-medium transition-all bg-darkBlue rounded hover:bg-white group"
+                      >
+                        <span className="w-48 h-48 rounded rotate-[-40deg] bg-white absolute bottom-0 left-0 -translate-x-full ease-out duration-700 transition-all translate-y-full mb-9 ml-9 group-hover:ml-0 group-hover:mb-32 group-hover:translate-x-0"></span>
+                        <span className="relative w-full text-left text-white transition-colors duration-700 ease-in-out group-hover:text-black ">
+                          Share
+                        </span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </Form>
+                </Form>
+              )}
+
               {/* Posts */}
               {isUserProfile
                 ? userPosts?.map((post, index) => (

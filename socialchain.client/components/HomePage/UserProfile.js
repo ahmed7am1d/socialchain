@@ -10,7 +10,7 @@ export const UserProfile = ({ userId }) => {
 
   useEffect(() => {
     async function setUserData() {
-      if (userId?.toUpperCase() !== auth?.accountAddress?.toUpperCase()) {
+      if (userId !== auth?.accountAddress) {
         //[1]- Fetch the new user data
         const userObjectResult = await getUserByAccountAddress(userId);
         setUserObject(userObjectResult);

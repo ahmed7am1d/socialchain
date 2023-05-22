@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { LeftSideBar } from "@/components/HomePage/LeftSideBar";
 import { RightSideBar } from "@/components/HomePage/RightSideBar";
-import { ethers } from "ethers";
+import { ethers, utils } from "ethers";
 import useAuth from "@/hooks/useAuth";
 import socialChainContractABI from "../contract-artifacts/contracts/SocialChain.sol/SocialChain.json";
 import SocialChainContractConstants from "@/constants/blockchain/SocialChainContractConstants";
@@ -20,7 +20,7 @@ const HomePageLayout = ({ children }) => {
         provider
       );
       const result = await contract.getUser(accountAddresses[0]);
-
+      console.log(accountAddresses[0]);
       //[2]- Set it to the auth state
       setAuth({
         id: parseInt(result[0]._hex, 16),
@@ -31,7 +31,7 @@ const HomePageLayout = ({ children }) => {
         showUsername: result[5],
         imageHash: result[6],
         coverHash: result[7],
-        accountAddress: accountAddresses[0],
+        accountAddress: utils.getAddress(accountAddresses[0])
       });
     }
     setUserInformation();

@@ -197,13 +197,10 @@ const login = () => {
             });
             return false;
           }
-          //[5]- Forward the user to the login page with sending parameters
-          router.push(
-            {
-              pathname: "/home/profile",
-            },
-            "./home/profile"
-          );
+          //[5]- Forward the user to the home page with sending parameters
+          router.push({
+            pathname: `/home/profile/${accountAddresses[0]}`,
+          });
         } catch (e) {
           messageApi.open({
             type: "error",
@@ -291,7 +288,7 @@ const login = () => {
               });
               return false;
             }
-            //[5]- Forward the user to the login page with sending parameters
+            //[5]- Forward the user to the home page with sending parameters
             router.push({
               pathname: `/home/profile/${accountAddresses[0]}`,
             });

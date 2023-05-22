@@ -241,13 +241,13 @@ contract SocialChain {
         return posts[_postId];
     }
 
-    function getUserPosts()
+    function getUserPosts(address _userAddress)
         public
         view
         onlyAllowedUser(msg.sender)
         returns (Post[] memory)
     {
-        uint256[] memory userPostIds = userPosts[msg.sender];
+        uint256[] memory userPostIds = userPosts[_userAddress];
         Post[] memory userPostsTemp = new Post[](userPostIds.length);
         for (uint256 i = 0; i < userPostIds.length; i++) {
             userPostsTemp[i] = posts[userPostIds[i]];
