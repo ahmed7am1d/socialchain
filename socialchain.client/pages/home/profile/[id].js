@@ -1,17 +1,16 @@
 import { Feed } from "@/components/HomePage/Feed";
 import { UserProfile } from "@/components/HomePage/UserProfile";
 import HomePageLayout from "@/layouts/homePageLayout";
-import React, { useEffect } from "react";
-import Router, { useRouter } from "next/router";
-import { ethers, providers } from "ethers";
+import React from "react";
+import { useRouter } from "next/router";
 const profile = (props) => {
   const router = useRouter();
-
+  const {id} = router.query;
 
   return (
     <>
-      <UserProfile />
-      <Feed isUserProfile={true}/>
+      <UserProfile userId={id} />
+      <Feed isUserProfile={true} userId={id} />
     </>
   );
 };

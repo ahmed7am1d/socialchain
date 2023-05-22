@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Checkbox, message } from "antd";
-import { ethers, providers } from "ethers";
+import { ethers } from "ethers";
 import { isRegisteredUser, nonce, verify } from "@/services/api/authService";
 import useAuth from "@/hooks/useAuth";
 import { useRouter } from "next/router";
@@ -9,8 +9,6 @@ import { DatePicker, Form } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
   useIPFS,
-  perofrmanceImage,
-  transparencyImage,
   metaMaskImage,
   connectWallet,
   coinbaseWallet,
@@ -20,7 +18,6 @@ import {
   keyStore,
   kava,
   osmosis,
-  uploadImage,
 } from "../../imports/loginImports.js";
 
 import Image from "next/image";
@@ -32,7 +29,7 @@ import fileToBase64 from "@/utils/Files/fileUtils";
 import SocialChainContractConstants from "@/constants/blockchain/SocialChainContractConstants";
 import SocialChainContract from "../../contract-artifacts/contracts/SocialChain.sol/SocialChain.json";
 import { euDateToISO8601, iSO8601ToUnixDate } from "@/utils/Date/dateUtils";
-import extractContractModifierErrorMessage from "@/utils/Errors/extractContractModifierErrorMessageUtils";
+import extractContractModifierErrorMessage from "@/utils/Errors/extractContractModifierErrorMessage.js";
 import { LottieAnimation } from "@/components/Animations/LottieAnimation";
 
 /**
@@ -172,7 +169,9 @@ const login = () => {
           document.cookie = "rememberMe=true";
         } catch (error) {
           //Contract Error
-          const errorMessage = extractContractModifierErrorMessage(error.data.message);
+          const errorMessage = extractContractModifierErrorMessage(
+            error.data.message
+          );
           messageApi.open({
             type: "error",
             content: errorMessage,
@@ -198,13 +197,10 @@ const login = () => {
             });
             return false;
           }
-          //[5]- Forward the user to the login page with sending parameters
-          router.push(
-            {
-              pathname: "/home/profile",
-            },
-            "./home/profile"
-          );
+          //[5]- Forward the user to the home page with sending parameters
+          router.push({
+            pathname: `/home/profile/${accountAddresses[0]}`,
+          });
         } catch (e) {
           messageApi.open({
             type: "error",
@@ -292,13 +288,10 @@ const login = () => {
               });
               return false;
             }
-            //[5]- Forward the user to the login page with sending parameters
-            router.push(
-              {
-                pathname: "/home/profile",
-              },
-              "./home/profile"
-            );
+            //[5]- Forward the user to the home page with sending parameters
+            router.push({
+              pathname: `/home/profile/${accountAddresses[0]}`,
+            });
           } catch (e) {
             messageApi.open({
               type: "error",

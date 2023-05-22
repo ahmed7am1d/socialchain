@@ -15,7 +15,7 @@ import SocialChainContractConstants from "@/constants/blockchain/SocialChainCont
  * interact with a smart contract on the Ethereum blockchain to retrieve the user's posts and
  * associated comments.
  */
-export const getUserPosts = async () => {
+export const getUserPosts = async (userId) => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const accountAddresses = await provider.send("eth_requestAccounts", []);
   const signer = provider.getSigner();
@@ -24,7 +24,7 @@ export const getUserPosts = async () => {
     socialChainContractABI.abi,
     signer
   );
-  const result = await contract.getUserPosts();
+  const result = await contract.getUserPosts(userId);
 
   if (result.length === 0) {
     return null;
@@ -402,4 +402,34 @@ export const getPostComments = async (postId, listNumber, commentPerList) => {
   });
 
   return Promise.all(filteredComments);
+};
+
+/**
+ * This function retrieves a user object from a smart contract and returns a filtered version of it.
+ * @param accountAddress - The Ethereum address of the user whose information is being retrieved from
+ * the SocialChain smart contract.
+ * @returns The function `getUserByAccountAddress` returns a filtered user object with properties such
+ * as bio, coverHash, imageHash, userName, name, showUserName, and id. The function retrieves the user
+ * object from the SocialChain smart contract using the provided account address.
+ */
+export const getUserByAccountAddress = async (accountAddress) => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(
+    SocialChainContractConstants.SOCIAL_CHAIN_CONTRACT_ADDRESS,
+    socialChainContractABI.abi,
+    signer
+  );
+  let userObject = await contract.getUser(accountAddress);
+  let userObjectFiltered = {
+    bio:userObject?.bio,
+    coverHash:userObject?.coverHash,
+    imageHash:userObject?.imageHash,
+    userName:userObject?.userName,
+    //userBirthDate is still a missing feature
+    name:userObject?.name,
+    showUserName: userObject?.showUserName,
+    id : parseInt(userObject?.id._hex, 16)
+  }
+ return userObjectFiltered;
 };

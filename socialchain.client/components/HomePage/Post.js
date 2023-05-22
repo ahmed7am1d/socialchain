@@ -9,7 +9,8 @@ import {
   SendOutlined,
 } from "@ant-design/icons";
 import ConfettiExplosion from "react-confetti-explosion";
-
+import Link from "next/link";
+import { isRegisteredUser } from "@/services/api/authService";
 
 const Post = ({
   isUserProfile,
@@ -25,7 +26,9 @@ const Post = ({
   return (
     <div
       key={post?.postId}
-      className="p-4 bg-darkBlueHalfTrans mt-5 flex flex-col gap-y-5 rounded-md"
+      className={`p-4 bg-darkBlueHalfTrans ${
+        isUserProfile ? post?.userName === auth?.userName && "mt-5" : "mt-5"
+      }  flex flex-col gap-y-5 rounded-md`}
     >
       {/* user info - created by */}
       <div className="flex justify-between font-sans">
@@ -50,13 +53,20 @@ const Post = ({
           </div>
           <div>
             <p>
-              {isUserProfile ? (
-                <strong>{auth?.userName}</strong>
-              ) : (
-                <strong>{post?.userName}</strong>
-              )}
-             {" "} shared a post
+              <Link href={`/home/profile/${post?.author}`}>
+                {isUserProfile ? (
+                  post?.userName !== auth?.userName ? (
+                    <strong>{post?.userName}</strong>
+                  ) : (
+                    <strong>{auth?.userName}</strong>
+                  )
+                ) : (
+                  <strong>{post?.userName}</strong>
+                )}{" "}
+                shared a post
+              </Link>
             </p>
+
             <p className="text-gray-400">{post?.timeStamp}</p>
           </div>
         </div>
