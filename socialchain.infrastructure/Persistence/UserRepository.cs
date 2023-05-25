@@ -46,8 +46,12 @@ public class UserRepository : IUserRepository
         var userDB = _context.Users.SingleOrDefault(u => u.AccountAddress == user.AccountAddress);
 
         userDB.RefreshToken = refreshToken;
-        userDB.TokenExpires = refreshTokenExpiryTime;
-        userDB.TokenCreated = refreshTokenDateCreated;
+        //For MS SQL Server:
+        //userDB.TokenExpires = refreshTokenExpiryTime;
+        //userDB.TokenCreated = refreshTokenDateCreated;
+        //For PostgresSQL 
+        userDB.TokenExpires = refreshTokenExpiryTime.ToUniversalTime();
+        userDB.TokenCreated = refreshTokenDateCreated.ToUniversalTime();
 
         _context.Entry(userDB).State = EntityState.Modified;
          _context.SaveChanges();
