@@ -21,7 +21,7 @@ namespace socialchain.api
             //DbContext
             services.AddDbContext<DataContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("SocialChainDB"),
+                options.UseNpgsql(builder.Configuration.GetConnectionString("SocialChainDBPostgresSQL"),
                     x => x.MigrationsAssembly("socialchain.infrastructure"));
             });
             return services;

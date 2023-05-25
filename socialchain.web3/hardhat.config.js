@@ -1,3 +1,5 @@
+// import config before anything else
+require("dotenv").config();
 require("@nomicfoundation/hardhat-toolbox");
 // const socialChainCompiled = require("../socialchain.client/contract-artifacts/contracts/SocialChain.sol/SocialChain.json");
 // const { abi, bytecode } = socialChainCompiled;
@@ -76,7 +78,7 @@ require("@nomicfoundation/hardhat-toolbox");
 //     console.log(result);
 //   })
 
-//   //[6]- Get all user post 
+//   //[6]- Get all user post
 //   task("get-user-posts","Get all user's post")
 //   .setAction( async () => {
 //     const MyContract = await ethers.getContractFactory("SocialChain");
@@ -118,8 +120,18 @@ module.exports = {
     },
     // Ganache local blockchain
     localGanache: {
-      url:'HTTP://127.0.0.1:7545',
-      accounts:['0x4b47c7182ec4b541f8ae53f220e5925e99c4e50c3754f9a8ecbe3260946c86b4']
-    }
+      url: "HTTP://127.0.0.1:7545",
+      accounts: [
+        "0x4b47c7182ec4b541f8ae53f220e5925e99c4e50c3754f9a8ecbe3260946c86b4",
+      ],
+    },
+    // Polygon test net
+    polygon_mumbai: {
+      url: "https://rpc-mumbai.maticvigil.com",
+      accounts: [process.env.PRIVATE_KEY],
+    },
+  },
+  etherscan: {
+    apiKey: process.env.POLYGONSCAN_API_KEY,
   },
 };
