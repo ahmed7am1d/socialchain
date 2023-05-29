@@ -42,36 +42,36 @@ import { LottieAnimation } from "@/components/Animations/LottieAnimation";
  * @returns {Object} An object containing either a redirect destination or an empty props object.
  * @throws {Error} If an error occurs while parsing the cookies or.
  */
-export async function getServerSideProps(context) {
-  try {
-    const cookies = cookie.parse(context.req.headers.cookie || ""); // Use an empty string if there is no cookie header
-    const accessToken = cookies?.accessToken;
-    if (accessToken) {
-      if (await isValidJWT(accessToken)) {
-        return {
-          redirect: {
-            destination: "/home",
-            permanent: false,
-          },
-          props: {},
-        };
-      } else {
-        return {
-          props: {},
-        };
-      }
-    } else {
-      return {
-        props: {},
-      };
-    }
-  } catch (e) {
-    console.error(e); // Log the error for debugging purposes
-    return {
-      props: {},
-    };
-  }
-}
+// export async function getServerSideProps(context) {
+//   try {
+//     const cookies = cookie.parse(context.req.headers.cookie || ""); // Use an empty string if there is no cookie header
+//     const accessToken = cookies?.accessToken;
+//     if (accessToken) {
+//       if (await isValidJWT(accessToken)) {
+//         return {
+//           redirect: {
+//             destination: "/home",
+//             permanent: false,
+//           },
+//           props: {},
+//         };
+//       } else {
+//         return {
+//           props: {},
+//         };
+//       }
+//     } else {
+//       return {
+//         props: {},
+//       };
+//     }
+//   } catch (e) {
+//     console.error(e); // Log the error for debugging purposes
+//     return {
+//       props: {},
+//     };
+//   }
+// }
 
 const login = () => {
   //#region states & variables
@@ -199,7 +199,7 @@ const login = () => {
           }
           //[5]- Forward the user to the home page with sending parameters
           router.push({
-            pathname: `/home/profile/${accountAddresses[0]}`,
+            pathname: `/home/profile/${accountAddresses[0]}`
           });
         } catch (e) {
           messageApi.open({
