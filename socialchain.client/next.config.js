@@ -2,8 +2,7 @@
 const nextConfig = {
   reactStrictMode: false,
   images: {
-    domains: ['ipfs.io'],
-    unoptimized:true
+    domains: ['ipfs.io']
   },
 }
 

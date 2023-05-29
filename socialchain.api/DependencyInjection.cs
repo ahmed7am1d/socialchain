@@ -10,8 +10,11 @@ namespace socialchain.api
         {
             services.AddCors(o => o.AddPolicy("SocialChainPolicy", builder =>
             {
-                builder.WithOrigins("http://localhost:3000", "http://localhost:3000/", "https://localhost:3000/",
-                        "localhost:3000/")
+                builder.WithOrigins("http://localhost:3000",
+                      "http://localhost:3000/",
+                      "https://localhost:3000/",
+                      "localhost:3000/",
+                      "https://socialchainapi.vercel.app", "https://socialchainapi.vercel.app/")
                            .AllowAnyMethod()
                            .AllowAnyHeader()
                            .AllowCredentials();

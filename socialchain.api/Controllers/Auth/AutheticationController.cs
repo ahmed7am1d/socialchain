@@ -49,7 +49,6 @@ namespace ToDo.Api.Controllers
 
                 var cookieOptionsRefreshToken = _cookiesService.GetRefreshTokenCookieOptions(verifyResult.Value.User.TokenExpires);
                 var cookieOptionsAccessToken = _cookiesService.GetAccessTokenCookieOptions();
-
                 Response.Cookies.Append("refreshToken", verifyResult.Value.User.RefreshToken, cookieOptionsRefreshToken);
                 Response.Cookies.Append("accessToken", verifyResult.Value.AccessToken, cookieOptionsAccessToken);
 

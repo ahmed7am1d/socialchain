@@ -17,9 +17,13 @@ var app = builder.Build();
     {
 
     }
+    if (app.Environment.IsProduction())
+    {
+        //Disabled for the purpose of the nextjs api [local host no https]  BUT IT IS ALREADY INSIDE PRODUCTION
+        app.UseHttpsRedirection();
+    }
     app.UseExceptionHandler("/error");
     app.UseCors("SocialChainPolicy");
-    //app.UseHttpsRedirection(); => disabled for the purpose of the nextjs api [] 
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();

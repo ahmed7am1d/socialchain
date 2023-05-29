@@ -9,21 +9,31 @@ using System.Threading.Tasks;
 namespace socialchain.application.Services.Cookies;
 public class CookiesService : ICookiesService
 {
+
     public CookieOptions GetRefreshTokenCookieOptions(DateTime refreshTokenExpiryDate) => new CookieOptions
     {
+
         HttpOnly = true,
         Expires = refreshTokenExpiryDate,
         IsEssential = true,
+        //For development:
+        //Secure = false,
+        //For production: (to enable only HTTPS) 
         Secure = true,
-        SameSite = SameSiteMode.None
+        MaxAge = TimeSpan.FromMilliseconds(1000),
+        SameSite = SameSiteMode.None,
     };
 
     public CookieOptions GetAccessTokenCookieOptions() => new CookieOptions
     {
         HttpOnly = true,
         IsEssential = true,
+        //For development:
+        //Secure = false,
+        //For production: (to enable only HTTPS) 
         Secure = true,
-        SameSite = SameSiteMode.None
+        MaxAge = TimeSpan.FromMilliseconds(1000),
+        SameSite = SameSiteMode.None,
     };
 }
 
